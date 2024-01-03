@@ -5,7 +5,6 @@
     <router-link to="/about">About</router-link>
     <router-link :to="{ name: 'CarsList' }">Cars</router-link>
     <div class="user-actions">
-      <!-- Show Sign In or Logout based on user authentication -->
       <router-link v-if="!isAuthenticated" to="/login">Sign In</router-link>
       <button v-if="isAuthenticated" @click="logout">Logout</button>
     </div>
@@ -15,30 +14,41 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   computed: {
     isAuthenticated() {
       const expirationTime = localStorage.getItem('tokenExpiration');
       if (expirationTime === null) {
-        return false; // Token expiration time not set
+        return false;
       }
       return new Date().getTime() < expirationTime;
     },
   },
   methods: {
-    logout() {
-      // Clear the access token from localStorage
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('tokenExpiration');
-      
-      // Update the store's isAuthenticated state on logout
-      this.$store.commit('setAuthentication', false);
+    async logout() {
+      try {
+        await axios.post(
+          'http://127.0.0.1:8000/api/v1/auth/jwt/logout/',
+          { refresh: localStorage.getItem('refreshToken') },
+          {
+            headers: {
+              Authorization: `JWT ${localStorage.getItem('accessToken')}`,
+            },
+          }
+        );
 
-      // Optionally, you can clear localStorage or perform other actions
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('tokenExpiration');
 
-      // Redirect to home or login page
-      this.$router.push('/');
+        this.$store.commit('setAuthentication', false);
+
+        this.$router.push('/');
+      } catch (error) {
+        console.error('Logout failed:', error);
+      }
     },
   },
 };
@@ -57,8 +67,6 @@ export default {
 nav {
   padding: 30px;
   display: flex;
-  /* justify-content: space-between; */
-  
 }
 
 nav a {
@@ -91,7 +99,6 @@ nav a.router-link-exact-active {
   text-decoration: none;
 }
 
-/* Move Sign In/Logout to the top-right */
 .user-actions {
   margin-left: auto;
 }

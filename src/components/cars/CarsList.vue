@@ -24,26 +24,14 @@ export default {
       cars: [],
     };
   },
-  // Use the created lifecycle hook to fetch data when the component is created
   created() {
-    // Uncomment the following lines when using API
-    // Replace 'your-api-endpoint' with the actual endpoint
     axios.get('http://127.0.0.1:8000/api/v1/cars/')
       .then(response => {
-        // Update the 'cars' data with the received data
         this.cars = response.data;
       })
       .catch(error => {
         console.error('Error fetching data:', error);
       });
-
-    // For testing and development, you can keep the hardcoded data
-    // this.cars = [
-    //   { name: 'BMW', model: '2024', id: 1, desc: 'description' },
-    //   { name: 'Nissan', model: '2024', id: 2, desc: 'description' },
-    //   { name: 'Suzuki', model: '2024', id: 3, desc: 'description' },
-    //   { name: 'Tucson', model: '2024', id: 4, desc: 'description' },
-    // ];
   },
 };
 </script>

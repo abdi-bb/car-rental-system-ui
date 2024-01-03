@@ -6,7 +6,6 @@
         <p>Car: {{ review.car.name }}</p>
         <p>Rating: {{ review.rating }}</p>
         <p>Description: {{ review.description }}</p>
-        <!-- Add more details as needed -->
       </div>
       <div v-else>
         <p>Review not found</p>
@@ -24,19 +23,6 @@
       };
     },
     methods: {
-      // For testing purposes, use hardcoded data
-      // fetchReviewData() {
-      //   this.review = {
-      //     id: 1,
-      //     customer: { user: { username: 'JohnDoe' } },
-      //     car: { name: 'BMW' },
-      //     rating: 5,
-      //     description: 'Great car!',
-      //     // Add more data as needed
-      //   };
-      // },
-  
-      // Uncomment the following lines when using API
       fetchReviewData() {
         const carId = this.$route.params.carId;
         const reviewId = this.$route.params.reviewId;
@@ -57,6 +43,5 @@
   </script>
   
   <style>
-  /* Add your styles here if needed */
   </style>
   

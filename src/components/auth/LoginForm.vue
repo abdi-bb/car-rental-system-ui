@@ -28,7 +28,7 @@
           username: '',
           password: '',
         },
-        loginError: '', // Error message to display to the user
+        loginError: '',
       };
     },
     methods: {
@@ -46,27 +46,18 @@
             throw new Error('Failed to authenticate user');
           }
   
-          // Assuming the API response contains 'access' and 'refresh' tokens
           const responseData = await response.json();
 
-          // Decode the access token to get the expiration time
           const decodedAccessToken = jwtDecode(responseData.access);
 
-          // Extract the expiration time from the decoded token
           const expirationTime = decodedAccessToken.exp * 1000;  // Convert to milliseconds
         
-          // Store tokens in Vuex and localStorage
           this.$store.commit('setAccessToken', responseData.access);
           this.$store.commit('setRefreshToken', responseData.refresh);
           this.$store.commit('setTokenExpiration', expirationTime)
-          // Store the expiration time in localStorage
-          // localStorage.setItem('tokenExpiration', expirationTime);
 
-          // Mark the user as authenticated
           this.$store.commit('setAuthentication', true);
 
-          // Redirect to a secure page (e.g., dashboard)
-          // this.$router.push('/dashboard');
           this.$router.push('/');
         } catch (error) {
           console.error('Error authenticating user:', error);
@@ -78,6 +69,5 @@
   </script>
   
   <style>
-  /* ... your styles ... */
   </style>
   

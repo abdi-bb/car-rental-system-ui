@@ -12,7 +12,6 @@
   </template>
   
   <script>
-  // Import axios library
   import axios from 'axios';
   
   export default {
@@ -22,21 +21,9 @@
       };
     },
     methods: {
-      // For testing purposes, use hardcoded data
-      // fetchData() {
-      //   this.customers = [
-      //     { id: 1, user: { username: 'JohnDoe' }, phone_number: '123-456-7890' },
-      //     { id: 2, user: { username: 'JaneSmith' }, phone_number: '987-654-3210' },
-      //     // Add more data as needed
-      //   ];
-      // },
-  
-      // Uncomment the following lines when using API
       fetchData() {
-        // Retrieve the access token from localStorage
         const accessToken = localStorage.getItem('accessToken');
 
-        // Set the Authorization header
         const headers = {
           'Authorization': `JWT ${accessToken}`,
         };
@@ -57,7 +44,6 @@
   </script>
   
   <style>
-  /* Add your styles here if needed */
   ul {
     list-style-type: none;
     padding: 0;

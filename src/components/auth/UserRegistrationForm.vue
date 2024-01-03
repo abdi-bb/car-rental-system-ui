@@ -47,7 +47,6 @@
     methods: {
       async submitForm() {
         try {
-          // Replace this URL with your actual backend API endpoint for user registration
           const response = await fetch('http://127.0.0.1:8000/api/v1/auth/users/', {
             method: 'POST',
             headers: {
@@ -61,7 +60,6 @@
           }
 
 
-          // Update registration message and redirect to login page
           this.registrationMessage = 'User registered successfully';
           this.$router.push('/login');
         } catch (error) {
@@ -74,7 +72,6 @@
   </script>
   
   <style>
-  /* Add your styles here if needed */
   form {
     max-width: 400px;
     margin: auto;

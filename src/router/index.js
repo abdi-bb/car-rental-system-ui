@@ -15,8 +15,6 @@ import CustomerDetail from '../components/customers/CustomerDetail.vue';
 import BookingsList from '../components/bookings/BookingsList.vue';
 import BookingDetail from '../components/bookings/BookingDetail.vue';
 
-
-
 const routes = [
   {
     path: '/register',
@@ -54,7 +52,7 @@ const routes = [
   },
   {
     path: '/car/:carId/reviews',
-    name: 'CarReviewsList', // This is the new route for reviews
+    name: 'CarReviewsList',
     component: CarReviewsList,
   },
   {

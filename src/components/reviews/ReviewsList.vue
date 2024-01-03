@@ -21,16 +21,6 @@
       };
     },
     methods: {
-      // For testing purposes, use hardcoded data
-      // fetchReviews() {
-      //   this.reviews = [
-      //     { id: 1, customer: { user: { username: 'JohnDoe' } }, car: { name: 'BMW' }, rating: 5 },
-      //     { id: 2, customer: { user: { username: 'JaneSmith' } }, car: { name: 'Nissan' }, rating: 4 },
-      //     // Add more data as needed
-      //   ];
-      // },
-  
-      // Uncomment the following lines when using API
       fetchReviews() {
         axios.get(`http://127.0.0.1:8000/api/v1/cars/${this.$route.params.carId}/reviews`)
           .then(response => {
@@ -48,7 +38,6 @@
   </script>
   
   <style>
-  /* Add your styles here if needed */
   ul {
     list-style-type: none;
     padding: 0;

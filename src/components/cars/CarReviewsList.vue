@@ -40,7 +40,6 @@ export default {
 </script>
 
 <style>
-/* Add your styles here if needed */
 ul {
   list-style-type: none;
   padding: 0;
