@@ -10,8 +10,8 @@ import CarsList from '../components/cars/CarsList.vue';
 import CarDetail from '../components/cars/CarDetail.vue';
 import CarReviewsList from '../components/cars/CarReviewsList.vue';
 import CarReviewDetail from '../components/cars/CarReviewDetail.vue';
-import CustomersList from '../components/customers/CustomersList.vue';
-import CustomerDetail from '../components/customers/CustomerDetail.vue';
+import UsersList from '../components/users/UsersList.vue';
+import UserDetail from '../components/users/UserDetail.vue';
 import BookingsList from '../components/bookings/BookingsList.vue';
 import BookingDetail from '../components/bookings/BookingDetail.vue';
 
@@ -61,14 +61,14 @@ const routes = [
     component: CarReviewDetail,
   },
   {
-    path: '/customers',
-    name: 'CustomersList',
-    component: CustomersList
+    path: '/users',
+    name: 'UsersList',
+    component: UsersList
   },
   {
     path: '/customer/:id',
-    name: 'CustomerDetail',
-    component: CustomerDetail,
+    name: 'UserDetail',
+    component: UserDetail,
   },
   {
     path: '/bookings',
