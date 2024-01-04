@@ -1,34 +1,36 @@
 <template>
-    <div>
+  <div class="container mt-5">
+    <div class="border rounded p-4 bg-light">
       <h2>User Registration</h2>
       <form @submit.prevent="submitForm">
-        <div>
-          <label for="username">Username:</label>
-          <input type="text" id="username" v-model="userData.username" required />
+        <div class="mb-3">
+          <label for="username" class="form-label">Username:</label>
+          <input type="text" id="username" v-model="userData.username" class="form-control" required />
         </div>
-        <div>
-          <label for="email">Email:</label>
-          <input type="email" id="email" v-model="userData.email" required />
+        <div class="mb-3">
+          <label for="email" class="form-label">Email:</label>
+          <input type="email" id="email" v-model="userData.email" class="form-control" required />
         </div>
-        <div>
-          <label for="password">Password:</label>
-          <input type="password" id="password" v-model="userData.password" required />
+        <div class="mb-3">
+          <label for="password" class="form-label">Password:</label>
+          <input type="password" id="password" v-model="userData.password" class="form-control" required />
         </div>
-        <div>
-          <label for="firstName">First Name:</label>
-          <input type="text" id="firstName" v-model="userData.firstName" required />
+        <div class="mb-3">
+          <label for="firstName" class="form-label">First Name:</label>
+          <input type="text" id="firstName" v-model="userData.firstName" class="form-control" required />
         </div>
-        <div>
-          <label for="lastName">Last Name:</label>
-          <input type="text" id="lastName" v-model="userData.lastName" required />
+        <div class="mb-3">
+          <label for="lastName" class="form-label">Last Name:</label>
+          <input type="text" id="lastName" v-model="userData.lastName" class="form-control" required />
         </div>
-        <div>
-          <button type="submit">Submit</button>
+        <div class="mb-3">
+          <button type="submit" class="btn btn-primary">Submit</button>
         </div>
       </form>
-      <p v-if="registrationMessage">{{ registrationMessage }}</p>
+      <p v-if="registrationMessage" class="mt-3 alert alert-info">{{ registrationMessage }}</p>
     </div>
-  </template>
+  </div>
+</template>
   
   <script>
   export default {
@@ -70,34 +72,7 @@
     },
   };
   </script>
-  
+
   <style>
-  form {
-    max-width: 400px;
-    margin: auto;
-  }
-  
-  label {
-    display: block;
-    margin-bottom: 8px;
-  }
-  
-  input {
-    width: 100%;
-    padding: 8px;
-    margin-bottom: 16px;
-  }
-  
-  button {
-    padding: 8px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    cursor: pointer;
-  }
-  
-  button:hover {
-    background-color: #0056b3;
-  }
   </style>
   
