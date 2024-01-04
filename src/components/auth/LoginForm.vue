@@ -1,6 +1,12 @@
 <template>
-  <div class="container mt-5 pt-5 pb-5">
+  <div class="container mt-5">
     <div class="border rounded p-4 bg-light">
+      <div class="card card-container">
+      <img
+        id="profile-img"
+        src="//ssl.gstatic.com/accounts/ui/avatar_2x.png"
+        class="profile-img-card"
+      />
       <h1>Login</h1>
     <form @submit.prevent="submitForm" class="mt-3">
       <div class="mb-3">
@@ -16,6 +22,7 @@
       </div>
     </form>
     <p v-if="loginError" class="mt-3 text-danger">{{ loginError }}</p>
+  </div>
   </div>
 </div>
 </template>
