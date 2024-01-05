@@ -1,28 +1,43 @@
 <template>
-    <div>
-      <h2>Customers List</h2>
-      <ul>
-        <li v-for="user in users" :key="user.id">
-          <router-link :to="{ name: 'UserDetail', params: { id: user.id }}">
-            {{ user.username }} - {{ user.phone_number || 'Phone Number N/A'}}
-          </router-link>
-        </li>
-      </ul>
-    </div>
-  </template>
-  
-  <script>
-  import axios from 'axios';
-  import { refreshToken } from '@/refresh';
-  
-  export default {
-    data() {
-      return {
-        users: [],
-      };
-    },
-    methods: {
-      async fetchData() {
+  <div>
+    <h2>Customers List</h2>
+    <table class="customer-table">
+      <thead>
+        <tr>
+          <th>First Name</th>
+          <th>Last Name</th>
+          <th>Phone Number</th>
+          <th>Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="user in users" :key="user.id">
+          <td>{{ user.first_name || 'N/A'}}</td>
+          <td>{{ user.last_name || 'N/A'}}</td>
+          <td>{{ user.phone_number || 'N/A' }}</td>
+          <td>
+            <router-link :to="{ name: 'UserDetail', params: { id: user.id }}">
+              Details
+            </router-link>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</template>
+
+<script>
+import axios from 'axios';
+import { refreshToken } from '@/services/refresh.token';
+
+export default {
+  data() {
+    return {
+      users: [],
+    };
+  },
+  methods: {
+    async fetchData() {
       try {
         const accessToken = localStorage.getItem('accessToken');
 
@@ -52,33 +67,36 @@
       }
     },
   },
-    created() {
-      this.fetchData();
-    },
-  };
-  </script>
-  
-  <style>
-  ul {
-    list-style-type: none;
-    padding: 0;
-  }
-  
-  li {
-    margin-bottom: 10px;
-    padding: 10px;
-    background-color: #f4f4f4;
-    border-radius: 8px;
-    cursor: pointer;
-  }
-  
-  li:hover {
-    background-color: #ddd;
-  }
-  
-  router-link {
-    text-decoration: none;
-    color: #333;
-  }
-  </style>
-  
+  created() {
+    this.fetchData();
+  },
+};
+</script>
+
+<style>
+.customer-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.customer-table th, .customer-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.customer-table th {
+  background-color: #f2f2f2;
+}
+
+.customer-table tr:hover {
+  background-color: #f5f5f5;
+}
+
+router-link {
+  text-decoration: none;
+  color: #0066cc;
+  cursor: pointer;
+}
+</style>
