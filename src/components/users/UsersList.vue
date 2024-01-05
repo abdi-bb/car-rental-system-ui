@@ -13,7 +13,7 @@
   
   <script>
   import axios from 'axios';
-  import { refreshToken } from '@/refresh';
+  import { refreshToken } from '@/services/refresh.token';
   
   export default {
     data() {

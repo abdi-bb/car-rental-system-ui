@@ -10,6 +10,8 @@ import CarsList from '../components/cars/CarsList.vue';
 import CarDetail from '../components/cars/CarDetail.vue';
 import CarReviewsList from '../components/cars/CarReviewsList.vue';
 import CarReviewDetail from '../components/cars/CarReviewDetail.vue';
+import CarImagesList from '../components/cars/CarImagesList.vue';
+import CarImageDetail from '../components/cars/CarImageDetail.vue';
 import UsersList from '../components/users/UsersList.vue';
 import UserDetail from '../components/users/UserDetail.vue';
 import BookingsList from '../components/bookings/BookingsList.vue';
@@ -59,6 +61,16 @@ const routes = [
     path: '/car/:carId/review/:reviewId',
     name: 'CarReviewDetail',
     component: CarReviewDetail,
+  },
+  {
+    path: '/car/:carId/images',
+    name: 'CarImagesList',
+    component: CarImagesList,
+  },
+  {
+    path: '/car/:carId/image/:imageId',
+    name: 'CarImageDetail',
+    component: CarImageDetail,
   },
   {
     path: '/users',

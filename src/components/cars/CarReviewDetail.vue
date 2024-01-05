@@ -1,20 +1,29 @@
 <template>
-    <div>
-      <h2>Review Detail</h2>
-      <div v-if="review">
-        <p>Customer: {{ review.customer.user.username }}</p>
-        <p>Car: {{ review.car.name }}</p>
-        <p>Rating: {{ review.rating }}</p>
-        <p>Description: {{ review.description }}</p>
+  <div class="container mt-4">
+    <h2 class="mb-4">Review Detail</h2>
+    <div v-if="review">
+      <div v-if="review.car_images && review.car_images.length > 0">
+        <ul class="list-unstyled d-flex">
+          <li v-for="(image, index) in review.car_images" :key="index" class="mr-2">
+            <img :src="image.image" alt="Car Image" class="img-thumbnail" style="max-width: 100px; max-height: 100px;" />
+          </li>
+        </ul>
       </div>
-      <div v-else>
-        <p>Review not found</p>
-      </div>
+      <p class="mt-3"><strong>Car Name:</strong> {{ review.car_name }}</p>
+      <p><strong>Reviewer:</strong> {{ review.username }}</p>
+      <p><strong>Stars:</strong> {{ review.rating }}</p>
+      <p><strong>Description:</strong> {{ review.description }}</p>
+      <p><strong>Date:</strong> {{ dateService.formatReadableDate(review.updated_at) }}</p>
     </div>
-  </template>
+    <div v-else>
+      <p>Review not found</p>
+    </div>
+  </div>
+</template>
   
   <script>
   import axios from 'axios';
+  import dateService from '@/services/DateService';
   
   export default {
     data() {
@@ -38,6 +47,11 @@
     },
     created() {
       this.fetchReviewData();
+    },
+    computed: {
+      dateService() {
+        return dateService;
+      },
     },
   };
   </script>
