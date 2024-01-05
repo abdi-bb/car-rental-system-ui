@@ -6,7 +6,6 @@
       <div class="car-info">
         <p><strong>Model:</strong> {{ car.model }}</p>
         <p><strong>Description:</strong> {{ car.desc }}</p>
-        <!-- Add more fields from the backend as needed -->
         <p><strong>Available:</strong> {{ car.available ? 'Yes' : 'No' }}</p>
         <p><strong>Seats:</strong> {{ car.seat }}</p>
         <p><strong>Doors:</strong> {{ car.door }}</p>
@@ -28,18 +27,15 @@ export default {
       car: null,
     };
   },
-  // Use the watch property to reactively update the 'car' data when 'id' changes
   watch: {
     id(newId) {
       this.fetchCarDetails(newId);
     },
   },
   created() {
-    // Fetch car details when the component is created
     this.fetchCarDetails(this.id);
   },
   methods: {
-    // Commented out API request for testing purposes
     async fetchCarDetails(id) {
       try {
         const response = await fetch(`http://127.0.0.1:8000/api/v1/cars/${id}`);
@@ -49,19 +45,9 @@ export default {
         this.car = await response.json();
       } catch (error) {
         console.error(error.message);
-        this.car = null; // Set car to null if an error occurs
+        this.car = null;
       }
     },
-    
-    // For testing purposes, use hardcoded data
-    // fetchCarDetails(id) {
-    //   const hardcodedData = [
-    //     { name: 'BMW', model: '2024', id: 1, desc: 'description', available: true, seat: 5, door: 4, gearbox: 'Automatic', price: 100 },
-    //     // Add more data as needed
-    //   ];
-    //   const car = hardcodedData.find(car => car.id === Number(id));
-    //   this.car = car || null;
-    // },
   },
 };
 </script>

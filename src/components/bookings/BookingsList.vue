@@ -22,35 +22,15 @@
       };
     },
     methods: {
-      // For testing purposes, use hardcoded data
       fetchData() {
-        this.bookings = [
-          {
-            id: 1,
-            customer: { user: { username: 'JohnDoe' } },
-            car: { name: 'BMW' },
-            start_date: '2023-03-01',
-          },
-          {
-            id: 2,
-            customer: { user: { username: 'JaneSmith' } },
-            car: { name: 'Nissan' },
-            start_date: '2023-03-15',
-          },
-          // Add more data as needed
-        ];
+        axios.get('http://127.0.0.1:8000/api/v1/bookings')
+          .then(response => {
+            this.bookings = response.data;
+          })
+          .catch(error => {
+            console.error('Error fetching data:', error);
+          });
       },
-  
-      // Uncomment the following lines when using API
-      // fetchData() {
-      //   axios.get('/api/bookings')
-      //     .then(response => {
-      //       this.bookings = response.data;
-      //     })
-      //     .catch(error => {
-      //       console.error('Error fetching data:', error);
-      //     });
-      // },
     },
     created() {
       this.fetchData();
@@ -59,7 +39,6 @@
   </script>
   
   <style>
-  /* Add your styles here if needed */
   ul {
     list-style-type: none;
     padding: 0;

@@ -10,7 +10,6 @@ export default { }
 </script>
 
 <style>
-/* Add your styles here if needed */
 .not-found {
   text-align: center;
   padding: 20px;
