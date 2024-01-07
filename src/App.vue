@@ -1,22 +1,19 @@
 <template>
   <div>
-    <nav>
-    <router-link to="/">Home</router-link>
-    <router-link to="/about">About</router-link>
-    <router-link :to="{ name: 'CarsList' }">Cars</router-link>
-    <div class="user-actions">
-      <router-link v-if="!isAuthenticated" to="/login">Sign In</router-link>
-      <button v-if="isAuthenticated" @click="logout">Logout</button>
-    </div>
-  </nav>
-  <router-view/>
+    <TheNavigation />
+    <router-view/>
   </div>
 </template>
 
 <script>
 import axios from 'axios';
+import TheNavigation from './views/TheNavigation.vue';
 
 export default {
+  name: 'App',
+  components: {
+    TheNavigation,
+  },
   computed: {
     isAuthenticated() {
       const expirationTime = localStorage.getItem('tokenExpiration');
