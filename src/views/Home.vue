@@ -1,26 +1,26 @@
 <template>
-  <div class="home">
-    <h1>Welcome to Car Rental System</h1>
-    <p>Explore our wide range of high-quality cars for rent. Whether you need a sedan for a business trip or an SUV for a family vacation, we have the perfect vehicle for you.</p>
-    
-    <div class="featured-cars row">
-      <h2 class="col-12">Featured Cars</h2>
-      <div v-for="car in featuredCars" :key="car.id" class="col-12 mb-3">
-        <h3>{{ car.name }}</h3>
+  <div class="home mt-24">
+    <h1 class="text-4xl font-bold mb-4">Welcome to Car Rental System</h1>
+    <p class="text-lg mb-6">Explore our wide range of high-quality cars for rent. Whether you need a sedan for a business trip or an SUV for a family vacation, we have the perfect vehicle for you.</p>
+
+    <div class="grid grid-cols-1 gap-6">
+      <h2 class="text-2xl mb-4">Featured Cars</h2>
+      <div v-for="car in featuredCars" :key="car.id" class="mb-6">
+        <h3 class="text-xl font-bold mb-2">{{ car.name }}</h3>
         <!-- Display stars based on average rating -->
-        <div class="average-rating">
-          <span v-for="star in stars(car.average_rating)" :key="star" class="star">★</span>
+        <div class=" mb-2">
+          <span v-for="star in stars(car.average_rating)" :key="star" class="text-yellow-500 text-xl">★</span>
         </div>
         <router-link :to="{ name: 'CarDetail', params: { id: car.id }}">
           <!-- Check if the car has images before displaying -->
-          <img v-if="car.images && car.images.length > 0" :src="car.images[0].image" :alt="car.name" class="img-fluid" />
+          <img v-if="car.images && car.images.length > 0" :src="car.images[0].image" :alt="car.name" class="w-full max-w-lg mx-auto h-auto" />
         </router-link>
         <!-- Check if the car has reviews before displaying -->
-        <p v-if="car.reviews && car.reviews.length > 0">{{ car.reviews[0].description }}</p>
+        <p v-if="car.reviews && car.reviews.length > 0" class="text-sm">{{ car.reviews[0].description }}</p>
       </div>
     </div>
-    
-    <p>Ready to hit the road? Rent a car with us today!</p>
+
+    <p class="text-lg mt-8">Ready to hit the road? Rent a car with us today!</p>
   </div>
 </template>
 
@@ -56,7 +56,7 @@ export default {
 };
 </script>
 
-<style>
+<!-- <style>
 /* Your styles here */
 .average-rating {
   color: #f8ce0b; /* Set the color of the stars */
@@ -65,4 +65,4 @@ export default {
 .star {
   margin-right: 2px; /* Adjust the spacing between stars */
 }
-</style>
+</style> -->

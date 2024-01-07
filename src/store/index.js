@@ -1,27 +1,37 @@
-import { createStore } from 'vuex';
+import { createStore } from "vuex";
 
-export default createStore({
+const store = createStore({
   state: {
     isAuthenticated: false,
-    accessToken: null,
-    refreshToken: null,
-    tokenExpiration: null,
+    token: null,
+    username: "",
+    userId: null,
   },
   mutations: {
-    setAuthentication(state, isAuthenticated) {
+    setAuthentication(state, { isAuthenticated, token, username }) {
       state.isAuthenticated = isAuthenticated;
+      state.token = token;
+      state.username = username;
     },
-    setAccessToken(state, accessToken) {
-        state.accessToken = accessToken;
-        localStorage.setItem('accessToken', accessToken);
+    setUserId(state, userId) {
+      state.userId = userId;
     },
-    setRefreshToken(state, refreshToken) {
-        state.refreshToken = refreshToken;
-        localStorage.setItem('refreshToken', refreshToken);
+  },
+  actions: {
+    initializeApp({ commit }) {
+      const token = localStorage.getItem("auth_token");
+      const username = localStorage.getItem("username");
+      const userId = localStorage.getItem("userId");
+
+      const isAuthenticated = !!token;
+
+      commit("setAuthentication", { isAuthenticated, token, username });
+      commit("setUserId", userId);
+
+      //console.log(token);
+      //console.log('Initialize app action called. isAuthenticated:', isAuthenticated, 'username:', username, 'userId:', userId);
     },
-    setTokenExpiration(state, tokenExpiration) {
-        state.tokenExpiration = tokenExpiration;
-        localStorage.setItem('tokenExpiration', tokenExpiration)
-    }
   },
 });
+
+export default store;
