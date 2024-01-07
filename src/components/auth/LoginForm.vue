@@ -6,6 +6,7 @@
         id="profile-img"
         src="//ssl.gstatic.com/accounts/ui/avatar_2x.png"
         class="profile-img-card"
+        style="width: 400px; height: 400px; margin: auto; border-radius: 50%;"
       />
       <h1>Login</h1>
     <form @submit.prevent="submitForm" class="mt-3">
