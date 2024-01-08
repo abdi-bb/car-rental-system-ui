@@ -262,25 +262,6 @@
               Password is required
             </p>
           </div>
-          <div class="mb-4">
-            <label for="registerConfirmPassword" class="block text-gray-700"
-              >Confirm Password</label
-            >
-            <input
-              type="password"
-              id="registerConfirmPassword"
-              v-model="registerData.confirmPassword"
-              class="w-full p-2 border rounded"
-              :required="formSubmitted && !registerData.confirmPassword"
-            />
-            <!-- Error message for confirm password -->
-            <p
-              v-if="formSubmitted && !registerData.confirmPassword"
-              class="text-red-500"
-            >
-              Confirm Password is required
-            </p>
-          </div>
           <button
             @click.prevent="submitForm"
             class="bg-green-500 text-white px-4 py-2 rounded col-span-full"
@@ -313,7 +294,6 @@ export default {
         username: "",
         email: "",
         password: "",
-        confirmPassword: "",
       },
 
       loginData: {
@@ -372,8 +352,7 @@ export default {
           !this.registerData.last_name ||
           !this.registerData.username ||
           !this.registerData.email ||
-          !this.registerData.password ||
-          this.registerData.password !== this.registerData.confirmPassword
+          !this.registerData.password
         ) {
           return;
         }
