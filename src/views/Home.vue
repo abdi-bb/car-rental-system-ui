@@ -56,13 +56,5 @@ export default {
 };
 </script>
 
-<!-- <style>
-/* Your styles here */
-.average-rating {
-  color: #f8ce0b; /* Set the color of the stars */
-  font-size: 1.5em; /* Adjust the size of the stars */
-}
-.star {
-  margin-right: 2px; /* Adjust the spacing between stars */
-}
-</style> -->
+<style>
+</style>

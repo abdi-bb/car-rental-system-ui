@@ -23,15 +23,15 @@ const routes = [
     name: 'UserRegistrationForm',
     component: UserRegistrationForm,
   },
-  {
-    path: '/login',
-    name: 'LoginForm',
-    component: LoginForm,
-  },
+  // {
+  //   path: '/login',
+  //   name: 'LoginForm',
+  //   component: LoginForm,
+  // },
   {
     path: '/',
-    name: 'home',
-    component: Home
+    name: 'Home',
+    component: Home,
   },
   {
     path: '/about',
@@ -91,6 +91,19 @@ const routes = [
     path: '/booking/:id',
     name: 'BookingDetail',
     component: BookingDetail,
+  },
+
+  {
+    path: "/my-bookings",
+    name: "MyBookings",
+    component: () => import("../components/bookings/MyBookings.vue"),
+    meta: { title: "MyBookings" },
+  },
+  {
+    path: "/my-account",
+    name: "MyAccount",
+    component: () => import("../components/users/MyAccount.vue"),
+    meta: { title: "MyAccount" },
   },
     // redirect
   {

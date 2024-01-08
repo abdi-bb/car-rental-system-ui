@@ -377,7 +377,7 @@ export default {
         ) {
           return;
         }
-        const response = await fetch("http://localhost:8000/auth/users/", {
+        const response = await fetch('http://127.0.0.1:8000/api/v1/auth/users/', {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -406,7 +406,7 @@ export default {
           return;
         }
 
-        const response = await fetch("http://localhost:8000/auth/token/", {
+        const response = await fetch('http://127.0.0.1:8000/api/v1/auth/jwt/create/', {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -416,14 +416,15 @@ export default {
 
         if (response.ok) {
           const data = await response.json();
-          const token = data.access;
+          const accessToken = data.access;
+          const refreshToken = data.refresh;
           const username = this.loginData.username;
 
           const userIdResponse = await fetch(
-            `http://localhost:8000/auth/users/?search=${username}`,
+            `http://localhost:8000/api/v1/auth/users/?search=${username}`,
             {
               headers: {
-                Authorization: `Bearer ${token}`,
+                Authorization: `JWT ${accessToken}`,
               },
             }
           );
@@ -432,12 +433,14 @@ export default {
 
           this.$store.commit("setAuthentication", {
             isAuthenticated: true,
-            token,
+            accessToken,
+            refreshToken,
             username,
           });
           this.$store.commit("setUserId", userId);
 
-          localStorage.setItem("auth_token", token);
+          localStorage.setItem("accessToken", accessToken);
+          localStorage.setItem("refreshToken", refreshToken);
           localStorage.setItem("username", username);
           localStorage.setItem("userId", userId);
 
@@ -454,14 +457,14 @@ export default {
 
     async logout() {
       try {
-        const refreshToken = localStorage.getItem("auth_token");
+        const refreshToken = localStorage.getItem("refreshToken");
         const response = await fetch(
-          "http://localhost:8000/auth/token/logout/",
+          'http://localhost:8000/api/v1/auth/jwt/logout/',
           {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${refreshToken}`,
+              Authorization: `JWT ${refreshToken}`,
             },
             body: JSON.stringify({ refresh: refreshToken }),
           }
@@ -470,11 +473,12 @@ export default {
         if (response.ok) {
           this.$store.commit("setAuthentication", {
             isAuthenticated: false,
-            token: null,
+            accessToken: null,
             username: null,
           });
 
-          localStorage.removeItem("auth_token");
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
           localStorage.removeItem("username");
           localStorage.removeItem("id");
           this.loginData.username = "";
