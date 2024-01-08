@@ -58,7 +58,7 @@
             >
               <div class="py-1">
                 <router-link
-                  to="/my-bookings"
+                  to="/bookings"
                   class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                 >
                   <img
@@ -69,7 +69,7 @@
                   My Bookings
                 </router-link>
                 <router-link
-                  to="/my-account"
+                  :to="{ name: 'UserDetail', params: { id: $store.state.userId } }"
                   class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                 >
                   <img src="../assets/img/user.png" alt="user icon" class="h-4 w-4 mr-2" />

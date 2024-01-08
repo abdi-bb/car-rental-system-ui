@@ -78,7 +78,7 @@ const routes = [
     component: UsersList
   },
   {
-    path: '/customer/:id',
+    path: '/user/:id',
     name: 'UserDetail',
     component: UserDetail,
   },
@@ -93,18 +93,18 @@ const routes = [
     component: BookingDetail,
   },
 
-  {
-    path: "/my-bookings",
-    name: "MyBookings",
-    component: () => import("../components/bookings/MyBookings.vue"),
-    meta: { title: "MyBookings" },
-  },
-  {
-    path: "/my-account",
-    name: "MyAccount",
-    component: () => import("../components/users/MyAccount.vue"),
-    meta: { title: "MyAccount" },
-  },
+  // {
+  //   path: "/my-bookings",
+  //   name: "MyBookings",
+  //   component: () => import("../components/bookings/MyBookings.vue"),
+  //   meta: { title: "MyBookings" },
+  // },
+  // {
+  //   path: "/my-account",
+  //   name: "MyAccount",
+  //   component: () => import("../components/users/MyAccount.vue"),
+  //   meta: { title: "MyAccount" },
+  // },
     // redirect
   {
     path: '/car-list',
