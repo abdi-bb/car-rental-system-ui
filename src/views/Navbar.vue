@@ -13,11 +13,12 @@
         <template v-if="!isAuthenticated">
           <button
             @click="showLoginModal"
-            class="text-black border border-green-500 px-4 py-2 rounded focus:outline-none"
+            class="text-black border border-green-500 px-4 py-2 rounded focus:outline-none transition duration-300 ease-in-out hover:bg-green-500 hover:text-white"
           >
             Sign In
           </button>
         </template>
+
         <template v-else>
           <div class="relative inline-block text-left">
             <button
