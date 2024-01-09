@@ -57,7 +57,18 @@
 
           <!-- Add other input fields for the remaining attributes of the Car model -->
 
-          <button type="submit" class="bg-blue-500 text-white p-2 rounded">Add Car</button>
+          <button
+                @click="addCar"
+                class="bg-green-500 text-white px-4 py-2 rounded mt-4"
+              >
+                Add Car
+              </button>
+              <button
+                @click="closeModal"
+                class="bg-gray-500 text-white px-4 py-2 rounded mt-4 ml-2"
+              >
+                Cancel
+              </button>
         </form>
       </div>
     </div>
@@ -212,7 +223,6 @@ export default {
     this.fetchCars();
     this.$store.dispatch('initializeApp').then(() => {
       this.isStaff = this.$store.state.isStaff;
-      console.log('isStaff:', this.isStaff);
   });
   },
 };

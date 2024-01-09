@@ -17,6 +17,7 @@ import ImageDetail from '../components/images/ImageDetail.vue';
 
 import UsersList from '../components/users/UsersList.vue';
 import UserDetail from '../components/users/UserDetail.vue';
+import Me from '../components/users/Me.vue';
 
 import BookingsList from '../components/bookings/BookingsList.vue';
 import BookingDetail from '../components/bookings/BookingDetail.vue';
@@ -85,6 +86,11 @@ const routes = [
     path: '/user/:id',
     name: 'UserDetail',
     component: UserDetail,
+  },
+  {
+    path: '/user/me',
+    name: 'Me',
+    component: Me,
   },
   {
     path: '/bookings',
