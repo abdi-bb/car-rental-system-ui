@@ -28,7 +28,7 @@
             </div>
 
             <!-- View Reviews link inside the loop -->
-            <router-link :to="{ name: 'CarReviewsList', params: { carId: car.id }}" class="text-blue-500 hover:underline">
+            <router-link :to="{ name: 'ReviewsList', params: { carId: car.id }}" class="text-blue-500 hover:underline">
               View Reviews
             </router-link>
           </div>

@@ -8,8 +8,8 @@ import LoginForm from '../components/auth/LoginForm.vue';
 
 import CarsList from '../components/cars/CarsList.vue';
 import CarDetail from '../components/cars/CarDetail.vue';
-import CarReviewsList from '../components/cars/CarReviewsList.vue';
-import CarReviewDetail from '../components/cars/CarReviewDetail.vue';
+import ReviewsList from '../components/reviews/ReviewsList.vue';
+import ReviewDetail from '../components/reviews/ReviewDetail.vue'
 import CarImagesList from '../components/cars/CarImagesList.vue';
 import CarImageDetail from '../components/cars/CarImageDetail.vue';
 import UsersList from '../components/users/UsersList.vue';
@@ -54,13 +54,13 @@ const routes = [
   },
   {
     path: '/car/:carId/reviews',
-    name: 'CarReviewsList',
-    component: CarReviewsList,
+    name: 'ReviewsList',
+    component: ReviewsList,
   },
   {
     path: '/car/:carId/review/:reviewId',
-    name: 'CarReviewDetail',
-    component: CarReviewDetail,
+    name: 'ReviewDetail',
+    component: ReviewDetail,
   },
   {
     path: '/car/:carId/images',

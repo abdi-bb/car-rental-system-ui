@@ -1,8 +1,8 @@
 <template>
-    <div>
+    <div class="mt-24">
       <h2>Review Detail</h2>
       <div v-if="review">
-        <p>Customer: {{ review.customer.user.username }}</p>
+        <p>Customer: {{ review.username }}</p>
         <p>Car: {{ review.car.name }}</p>
         <p>Rating: {{ review.rating }}</p>
         <p>Description: {{ review.description }}</p>
