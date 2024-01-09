@@ -245,6 +245,23 @@
             </p>
           </div>
           <div class="mb-4">
+            <label for="registerPhone" class="block text-gray-700"
+              >Phone Number</label>
+            <input
+              type="text"
+              id="registerPhone"
+              v-model="registerData.phone_number"
+              class="w-full p-2 border rounded"
+              :required="formSubmitted && !registerData.phone_number"
+            />
+            <!-- Error message for phone number -->
+            <p
+              v-if="formSubmitted && !registerData.phone_number"
+              class="text-red-500">
+              Phone Number is required
+              </p>
+          </div>
+          <div class="mb-4">
             <label for="registerPassword" class="block text-gray-700"
               >Password</label
             >
@@ -294,6 +311,7 @@ export default {
         last_name: "",
         username: "",
         email: "",
+        phone_number: "",
         password: "",
       },
 
@@ -353,9 +371,10 @@ export default {
           !this.registerData.last_name ||
           !this.registerData.username ||
           !this.registerData.email ||
+          !this.registerData.phone_number ||
           !this.registerData.password
         ) {
-          return;
+          console.error("All fields are required for registration.");
         }
         const headers = {
           'Content-Type': 'application/json',
