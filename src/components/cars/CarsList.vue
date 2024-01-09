@@ -1,6 +1,57 @@
 <template>
   <div class="mt-24">
     <h1 class="text-4xl font-bold mb-4">Available Cars</h1>
+
+    <!-- Form for adding a new car -->
+    <form @submit.prevent="addCar" class="mb-8">
+      <div class="flex flex-col mb-4">
+        <label for="name" class="mb-2 text-lg font-semibold">Car Name</label>
+        <input v-model="newCar.name" type="text" id="name" required class="border p-2" />
+      </div>
+
+      <div class="flex flex-col mb-4">
+        <label for="model" class="mb-2 text-lg font-semibold">Car Model</label>
+        <input v-model="newCar.model" type="text" id="model" required class="border p-2" />
+      </div>
+
+      <div class="flex flex-col mb-4">
+        <label for="seat" class="mb-2 text-lg font-semibold">Number of Seats</label>
+        <input v-model="newCar.seat" type="number" id="seat" required class="border p-2" />
+      </div>
+
+      <div class="flex flex-col mb-4">
+        <label for="door" class="mb-2 text-lg font-semibold">Number of Doors</label>
+        <input v-model="newCar.door" type="number" id="door" required class="border p-2" />
+      </div>
+
+      <div class="flex flex-col mb-4">
+        <label for="gearbox" class="mb-2 text-lg font-semibold">Gearbox</label>
+        <select v-model="newCar.gearbox" id="gearbox" required class="border p-2">
+          <option value="M">Manual</option>
+          <option value="A">Automatic</option>
+        </select>
+      </div>
+
+      <div class="flex flex-col mb-4">
+        <label for="price" class="mb-2 text-lg font-semibold">Price</label>
+        <input
+          v-model="newCar.price"
+          type="text"
+          id="price"
+          required
+          class="border p-2"
+          pattern="\d+(\.\d{1,2})?"
+          title="Enter a valid numeric value with up to two decimal places"
+        />
+      </div>
+
+      <!-- Add other input fields for the remaining attributes of the Car model -->
+
+      <button type="submit" class="bg-blue-500 text-white p-2 rounded">Add Car</button>
+    </form>
+
+
+    <!-- Retrieve cars list -->
     <div class="container mx-auto mt-8 flex flex-wrap pt-16">
       <router-link
         v-for="car in cars"
@@ -42,8 +93,8 @@
 
 
 <script>
-// Import axios library
 import axios from 'axios';
+import { refreshToken } from '@/services/refresh.token';
 
 export default {
   name: 'CarsList',
@@ -51,16 +102,94 @@ export default {
   data() {
     return {
       cars: [],
+      newCar: {
+        name: '',
+        model: '',
+        seat: 0,
+        door: 0,
+        gearbox: '',
+        price: 0.0,
+      },
     };
   },
+  methods: {
+    fetchCars() {
+      axios.get('http://127.0.0.1:8000/api/v1/cars/')
+        .then(response => {
+          this.cars = response.data;
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+        });
+    },
+    async addCar() {
+      try {
+        const accessToken = localStorage.getItem('accessToken');
+
+        const headers = {
+          'Content-Type': 'application/json',
+          Authorization: `JWT ${accessToken}`,
+        };
+
+        await axios.post('http://127.0.0.1:8000/api/v1/cars/', this.newCar, { headers });
+
+        // If the request is successful, update the cars list and reset the form
+        console.log('Car added successfully');
+        this.fetchCars();
+        this.newCar = {
+          name: '',
+          model: '',
+          seat: 0,
+          door: 0,
+          gearbox: '',
+          price: 0.0,
+        };
+      } catch (error) {
+        if (error.response && error.response.status === 401) {
+          // Unauthorized, try refreshing the token
+          try {
+            const newAccessToken = await refreshToken(this.$store);
+            // Retry the original request with the new access token
+            await this.addCarWithToken(newAccessToken);
+          } catch (refreshError) {
+            // Token refresh failed, handle accordingly
+            console.error('Token refresh failed:', refreshError);
+          }
+        } else {
+          // Handle other errors
+          console.error('Error adding car:', error);
+        }
+      }
+    },
+
+    async addCarWithToken(newAccessToken) {
+      try {
+        const headers = {
+          'Content-Type': 'application/json',
+          Authorization: `JWT ${newAccessToken}`,
+        };
+
+        await axios.post('http://127.0.0.1:8000/api/v1/cars/', this.newCar, { headers });
+
+        // If the request is successful, update the cars list and reset the form
+        console.log('Car added successfully');
+        this.fetchCars();
+        this.newCar = {
+          name: '',
+          model: '',
+          seat: 0,
+          door: 0,
+          gearbox: '',
+          price: 0.0,
+        };
+      } catch (error) {
+        // Handle errors in the retry request if needed
+        console.error('Error adding car with new token:', error);
+      }
+    },
+  },
   created() {
-    axios.get('http://127.0.0.1:8000/api/v1/cars/')
-      .then(response => {
-        this.cars = response.data;
-      })
-      .catch(error => {
-        console.error('Error fetching data:', error);
-      });
+    this.fetchCars();
   },
 };
 </script>
