@@ -1,19 +1,45 @@
 <template>
-  <div>
-    <h1>Cars</h1>
-    <div v-for="car in cars" :key="car.id" class="car">
-      <h2>{{ car.name }}</h2>
-      <div>
-        <router-link :to="{ name: 'CarDetail', params: { id: car.id, name: car.name }}">
-          <img :src="car.images.length > 0 ? car.images[0].image : ''" alt="Car Image" style="max-width: 100px; max-height: 100px; cursor: pointer;" />
-        </router-link>
-        <router-link :to="{ name: 'CarReviewsList', params: { carId: car.id }}">
-          <p>View Reviews</p>
-        </router-link>
-      </div>
+  <div class="mt-24">
+    <h1 class="text-4xl font-bold mb-4">Available Cars</h1>
+    <div class="container mx-auto mt-8 flex flex-wrap pt-16">
+      <router-link
+        v-for="car in cars"
+        :key="car.id"
+        :to="{ name: 'CarDetail', params: { id: car.id, name: car.name } }"
+        class="w-full sm:w-1/2 md:w-1/3 lg:w-1/3 xl:w-1/3 px-4 mb-8"
+      >
+        <div class="bg-white rounded-lg border">
+          <div class="h-40 overflow-hidden border-b pb-4 pt-2">
+            <img
+              :src="car.images.length > 0 ? car.images[0].image : ''"
+              :alt="car.name"
+              class="w-full h-full object-contain object-center"
+            />
+          </div>
+
+          <div class="p-4">
+            <div class="flex items-center justify-between mb-2">
+              <h2 class="text-base font-semibold">{{ car.name }}({{ car.model }})</h2>
+              <!-- <p class="text-gray-600 mb-2">{{ car.gearbox }}</p> -->
+
+              <p class="text-black font-semibold text-sm">
+                ${{ car.price }} <span class="font-normal">/day</span>
+              </p>
+            </div>
+
+            <!-- View Reviews link inside the loop -->
+            <router-link :to="{ name: 'ReviewsList', params: { carId: car.id }}" class="text-blue-500 hover:underline">
+              View Reviews
+            </router-link>
+          </div>
+        </div>
+      </router-link>
     </div>
   </div>
 </template>
+
+
+
 
 <script>
 // Import axios library
@@ -39,34 +65,5 @@ export default {
 };
 </script>
 
-<style>
-.car h2 {
-  background: #f4f4f4;
-  padding: 20px;
-  border-radius: 10px;
-  margin: 10px auto;
-  max-width: 600px;
-  cursor: pointer;
-  color: #444;
-}
 
-.car h2:hover {
-  background: #ddd;
-}
-
-.car img {
-  border-radius: 10px;
-  margin: 10px auto;
-  max-width: 100px;
-  cursor: pointer;
-}
-
-.car p {
-  margin: 10px 0;
-  cursor: pointer;
-}
-
-.car a {
-  text-decoration: none;
-}
-</style>
+<style></style>

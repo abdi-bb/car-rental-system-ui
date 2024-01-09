@@ -8,12 +8,16 @@ import LoginForm from '../components/auth/LoginForm.vue';
 
 import CarsList from '../components/cars/CarsList.vue';
 import CarDetail from '../components/cars/CarDetail.vue';
-import CarReviewsList from '../components/cars/CarReviewsList.vue';
-import CarReviewDetail from '../components/cars/CarReviewDetail.vue';
-import CarImagesList from '../components/cars/CarImagesList.vue';
-import CarImageDetail from '../components/cars/CarImageDetail.vue';
+
+import ReviewsList from '../components/reviews/ReviewsList.vue';
+import ReviewDetail from '../components/reviews/ReviewDetail.vue'
+
+import ImagesList from '../components/images/ImagesList.vue';
+import ImageDetail from '../components/images/ImageDetail.vue';
+
 import UsersList from '../components/users/UsersList.vue';
 import UserDetail from '../components/users/UserDetail.vue';
+
 import BookingsList from '../components/bookings/BookingsList.vue';
 import BookingDetail from '../components/bookings/BookingDetail.vue';
 
@@ -23,15 +27,15 @@ const routes = [
     name: 'UserRegistrationForm',
     component: UserRegistrationForm,
   },
-  {
-    path: '/login',
-    name: 'LoginForm',
-    component: LoginForm,
-  },
+  // {
+  //   path: '/login',
+  //   name: 'LoginForm',
+  //   component: LoginForm,
+  // },
   {
     path: '/',
-    name: 'home',
-    component: Home
+    name: 'Home',
+    component: Home,
   },
   {
     path: '/about',
@@ -54,23 +58,23 @@ const routes = [
   },
   {
     path: '/car/:carId/reviews',
-    name: 'CarReviewsList',
-    component: CarReviewsList,
+    name: 'ReviewsList',
+    component: ReviewsList,
   },
   {
     path: '/car/:carId/review/:reviewId',
-    name: 'CarReviewDetail',
-    component: CarReviewDetail,
+    name: 'ReviewDetail',
+    component: ReviewDetail,
   },
   {
     path: '/car/:carId/images',
-    name: 'CarImagesList',
-    component: CarImagesList,
+    name: 'ImagesList',
+    component: ImagesList,
   },
   {
     path: '/car/:carId/image/:imageId',
-    name: 'CarImageDetail',
-    component: CarImageDetail,
+    name: 'ImageDetail',
+    component: ImageDetail,
   },
   {
     path: '/users',
@@ -78,7 +82,7 @@ const routes = [
     component: UsersList
   },
   {
-    path: '/customer/:id',
+    path: '/user/:id',
     name: 'UserDetail',
     component: UserDetail,
   },
@@ -92,6 +96,19 @@ const routes = [
     name: 'BookingDetail',
     component: BookingDetail,
   },
+
+  // {
+  //   path: "/my-bookings",
+  //   name: "MyBookings",
+  //   component: () => import("../components/bookings/MyBookings.vue"),
+  //   meta: { title: "MyBookings" },
+  // },
+  // {
+  //   path: "/my-account",
+  //   name: "MyAccount",
+  //   component: () => import("../components/users/MyAccount.vue"),
+  //   meta: { title: "MyAccount" },
+  // },
     // redirect
   {
     path: '/car-list',
