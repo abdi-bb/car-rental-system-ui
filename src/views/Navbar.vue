@@ -70,7 +70,7 @@
                   My Bookings
                 </router-link>
                 <router-link
-                  :to="{ name: 'UserDetail', params: { id: $store.state.userId } }"
+                  :to="{ name: 'Me', params: { id: $store.state.userId } }"
                   class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                 >
                   <img src="../assets/img/user.png" alt="user icon" class="h-4 w-4 mr-2" />
@@ -245,6 +245,23 @@
             </p>
           </div>
           <div class="mb-4">
+            <label for="registerPhone" class="block text-gray-700"
+              >Phone Number</label>
+            <input
+              type="text"
+              id="registerPhone"
+              v-model="registerData.phone_number"
+              class="w-full p-2 border rounded"
+              :required="formSubmitted && !registerData.phone_number"
+            />
+            <!-- Error message for phone number -->
+            <p
+              v-if="formSubmitted && !registerData.phone_number"
+              class="text-red-500">
+              Phone Number is required
+              </p>
+          </div>
+          <div class="mb-4">
             <label for="registerPassword" class="block text-gray-700"
               >Password</label
             >
@@ -294,6 +311,7 @@ export default {
         last_name: "",
         username: "",
         email: "",
+        phone_number: "",
         password: "",
       },
 
@@ -353,15 +371,17 @@ export default {
           !this.registerData.last_name ||
           !this.registerData.username ||
           !this.registerData.email ||
+          !this.registerData.phone_number ||
           !this.registerData.password
         ) {
-          return;
+          console.error("All fields are required for registration.");
         }
+        const headers = {
+          'Content-Type': 'application/json',
+        };
         const response = await fetch('http://127.0.0.1:8000/api/v1/auth/users/', {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: headers,
           body: JSON.stringify(this.registerData),
         });
 
@@ -386,11 +406,12 @@ export default {
           return;
         }
 
+        const headers = {
+          'Content-Type': 'application/json',
+        };
         const response = await fetch('http://127.0.0.1:8000/api/v1/auth/jwt/create/', {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: headers,
           body: JSON.stringify(this.loginData),
         });
 
@@ -438,14 +459,15 @@ export default {
     async logout() {
       try {
         const refreshToken = localStorage.getItem("refreshToken");
+        const headers = {
+          'Content-Type': 'application/json',
+          Authorization: `JWT ${refreshToken}`,
+        };
         const response = await fetch(
           'http://localhost:8000/api/v1/auth/jwt/logout/',
           {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `JWT ${refreshToken}`,
-            },
+            headers: headers,
             body: JSON.stringify({ refresh: refreshToken }),
           }
         );
@@ -460,7 +482,7 @@ export default {
           localStorage.removeItem("accessToken");
           localStorage.removeItem("refreshToken");
           localStorage.removeItem("username");
-          localStorage.removeItem("id");
+          localStorage.removeItem("userId");
           this.loginData.username = "";
           this.loginData.password = "";
 
@@ -472,6 +494,9 @@ export default {
       } catch (error) {
         console.error("Error during logout", error);
       }
+    },
+    logoutFromOutside() {
+      this.logout();
     },
 
     async bookNow() {

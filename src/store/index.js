@@ -1,16 +1,22 @@
+import { refreshToken } from "@/services/refresh.token";
 import { createStore } from "vuex";
+import axios from "axios";
 
 const store = createStore({
   state: {
     isAuthenticated: false,
-    token: null,
+    isStaff: false,
+    accessToken: null,
+    refreshToken: null,
     username: "",
     userId: null,
   },
   mutations: {
-    setAuthentication(state, { isAuthenticated, token, username }) {
+    setAuthentication(state, { isAuthenticated, isStaff, accessToken, refreshToken, username }) {
       state.isAuthenticated = isAuthenticated;
-      state.token = token;
+      state.isStaff = isStaff;
+      state.accessToken = accessToken;
+      state.refreshToken = refreshToken;
       state.username = username;
     },
     setUserId(state, userId) {
@@ -18,18 +24,49 @@ const store = createStore({
     },
   },
   actions: {
-    initializeApp({ commit }) {
-      const token = localStorage.getItem("auth_token");
+    async initializeApp({ commit }) {
+      const accessToken = localStorage.getItem("accessToken");
+      const refreshToken = localStorage.getItem("refreshToken");
       const username = localStorage.getItem("username");
       const userId = localStorage.getItem("userId");
-
-      const isAuthenticated = !!token;
-
-      commit("setAuthentication", { isAuthenticated, token, username });
-      commit("setUserId", userId);
-
-      //console.log(token);
-      //console.log('Initialize app action called. isAuthenticated:', isAuthenticated, 'username:', username, 'userId:', userId);
+  
+      if (accessToken) {
+        try {
+          const headers = {
+            Authorization: `JWT ${accessToken}`,
+          };
+          // Send a request to the backend to check the user's authentication status and staff status
+          const response = await axios.get('http://localhost:8000/api/v1/auth/users/me', { headers });
+      
+          const isAuthenticated = !!accessToken;
+          const isStaff = response.data.is_staff;
+  
+          commit("setAuthentication", {
+            isAuthenticated,
+            isStaff,
+            accessToken,
+            refreshToken,
+            username
+          });
+          commit("setUserId", userId);
+        } catch (error) {
+            if (error.response) {
+              console.error('Error during initialization:', error.response.data);
+            } else if (error.request) {
+              console.error('No response received during initialization:', error.request);
+            } else {
+              console.error('Error setting up the request during initialization:', error.message);
+            }
+          commit("setAuthentication", {
+            isAuthenticated: false,
+            isStaff: false,
+            accessToken: null,
+            refreshToken: null,
+            username: ""
+          });
+          commit("setUserId", null);
+        }
+      }
     },
   },
 });
