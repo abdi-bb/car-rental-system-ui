@@ -12,7 +12,7 @@ const store = createStore({
     userId: null,
   },
   mutations: {
-    setAuthentication(state, { isAuthenticated, isStaff, accessToken, username }) {
+    setAuthentication(state, { isAuthenticated, isStaff, accessToken, refreshToken, username }) {
       state.isAuthenticated = isAuthenticated;
       state.isStaff = isStaff;
       state.accessToken = accessToken;

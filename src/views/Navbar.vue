@@ -463,7 +463,7 @@ export default {
           localStorage.removeItem("accessToken");
           localStorage.removeItem("refreshToken");
           localStorage.removeItem("username");
-          localStorage.removeItem("id");
+          localStorage.removeItem("userId");
           this.loginData.username = "";
           this.loginData.password = "";
 
