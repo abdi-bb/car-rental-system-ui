@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
+import { logout } from '../views/Navbar.vue';
 
 export const refreshToken = async (store) => {
   try {
@@ -17,6 +18,8 @@ export const refreshToken = async (store) => {
     return responseData.access;
   } catch (error) {
     console.error('Access token refresh failed:', error);
+
+    logout();
     throw error;
   }
 };

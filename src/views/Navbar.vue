@@ -357,11 +357,12 @@ export default {
         ) {
           return;
         }
+        const headers = {
+          'Content-Type': 'application/json',
+        };
         const response = await fetch('http://127.0.0.1:8000/api/v1/auth/users/', {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: headers,
           body: JSON.stringify(this.registerData),
         });
 
@@ -386,11 +387,12 @@ export default {
           return;
         }
 
+        const headers = {
+          'Content-Type': 'application/json',
+        };
         const response = await fetch('http://127.0.0.1:8000/api/v1/auth/jwt/create/', {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: headers,
           body: JSON.stringify(this.loginData),
         });
 
@@ -438,14 +440,15 @@ export default {
     async logout() {
       try {
         const refreshToken = localStorage.getItem("refreshToken");
+        const headers = {
+          'Content-Type': 'application/json',
+          Authorization: `JWT ${refreshToken}`,
+        };
         const response = await fetch(
           'http://localhost:8000/api/v1/auth/jwt/logout/',
           {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `JWT ${refreshToken}`,
-            },
+            headers: headers,
             body: JSON.stringify({ refresh: refreshToken }),
           }
         );
@@ -472,6 +475,9 @@ export default {
       } catch (error) {
         console.error("Error during logout", error);
       }
+    },
+    logoutFromOutside() {
+      this.logout();
     },
 
     async bookNow() {
