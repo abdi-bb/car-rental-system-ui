@@ -11,7 +11,7 @@
       <div class="mt-4 flex space-x-4">
 
         <!-- Button to open the update review modal -->
-        <button v-if="!isStaff" @click="openUpdateReviewModal" class="bg-blue-500 text-white px-4 py-2 rounded">Update Review</button>
+        <button v-if="!isStaff && isOwner" @click="openUpdateReviewModal" class="bg-blue-500 text-white px-4 py-2 rounded">Update Review</button>
         
         <!-- Modal for updating a review -->
         <div v-if="updateReviewModalOpen" class="fixed inset-0 z-50 overflow-auto flex items-center justify-center" @click.self="closeUpdateReviewModal">
@@ -36,7 +36,7 @@
             </form>
           </div>
         </div>
-        <button @click="deleteReview" class="bg-red-500 text-white px-4 py-2 rounded">Delete Review</button>
+        <button v-if="isOwner" @click="deleteReview" class="bg-red-500 text-white px-4 py-2 rounded">Delete Review</button>
       </div>
     </div>
     <div v-else class="text-gray-500 mt-4">
@@ -59,18 +59,21 @@ export default {
       },
       updateReviewModalOpen: false,
       isStaff: false,
+      isOwner: false,
+      userId: null,
     };
   },
   methods: {
-    fetchReviewData() {
-      axios.get(`http://127.0.0.1:8000/api/v1/cars/${this.$route.params.carId}/reviews/${this.$route.params.reviewId}`)
-        .then(response => {
-          this.review = response.data;
-        })
-        .catch(error => {
-          console.error('Error fetching review data:', error);
-          this.review = null;
-        });
+    async fetchReviewData() {
+      try {
+        const response = await axios.get(`http://127.0.0.1:8000/api/v1/cars/${this.$route.params.carId}/reviews/${this.$route.params.reviewId}`)
+        this.review = response.data;
+        this.isOwner = this.userId && this.review && parseInt(this.userId) === this.review.user_id;
+        console.log(this.isOwner);
+      } catch(error) {
+        console.error('Error fetching review data:', error);
+        this.review = null;
+      }
     },
     formatReadableDate(dateString) {
       return DateService.formatReadableDate(dateString);
@@ -81,18 +84,30 @@ export default {
         const accessToken = localStorage.getItem('accessToken');
 
         const headers = {
+          'Content-Type': 'application/json',
           Authorization: `JWT ${accessToken}`,
         };
+        
+        const requestBody = {
+          rating: this.updatedReview.rating,
+          description: this.updatedReview.description,
+        };
 
-        await axios.put(`http://localhost:8000/api/v1/cars/${this.$route.params.carId}/reviews/${this.$route.params.reviewId}/`, this.updatedReview, { headers })
-          .then(() => {
-            this.closeUpdateReviewModal();
-            this.$router.push({ name: 'ReviewsList' });
-          })
-          .catch(error => {
-            console.error('Error updating review:', error);
-          });
-      } catch (error) {
+        const response = await fetch(`http://localhost:8000/api/v1/cars/${this.$route.params.carId}/reviews/${this.$route.params.reviewId}/`, {
+          method: 'PUT',
+          headers: headers,
+          body: JSON.stringify(requestBody),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          this.review = data;
+          this.closeUpdateReviewModal();
+          this.$router.push({ name: 'ReviewsList' });
+        } else {
+          console.error('Error updating review:', response);
+        }
+      } catch(error) {
         console.error('Error updating review:', error);
       }
     },
@@ -121,9 +136,10 @@ export default {
     },
   },
   created() {
-    this.fetchReviewData();
     this.$store.dispatch('initializeApp').then(() => {
       this.isStaff = this.$store.state.isStaff;
+      this.userId = this.$store.state.userId;
+      this.fetchReviewData();
     });
   },
 };
