@@ -57,7 +57,8 @@ export default {
   methods: {
     stars(rating) {
       // Round the rating to the nearest half and convert it to the number of full stars
-      return Math.round(rating * 2) / 2;
+      const numberOfStars = Math.round(rating * 2) / 2;
+      return Array.from({ length: numberOfStars }, (_, index) => index + 1);
     },
   },
   created() {
