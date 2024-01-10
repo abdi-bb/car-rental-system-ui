@@ -8,10 +8,9 @@
       <p class="text-gray-700 mb-2">Description: {{ review.description }}</p>
       <p class="text-gray-700 mb-2">Created At: {{ formatReadableDate(review.created_at) }}</p>
       <p class="text-gray-700">Updated At: {{ formatReadableDate(review.updated_at) }}</p>
-      <div class="mt-4 flex space-x-4">
 
         <!-- Button to open the update review modal -->
-        <button v-if="!isStaff && isOwner" @click="openUpdateReviewModal" class="bg-blue-500 text-white px-4 py-2 rounded">Update Review</button>
+        <button v-if="!isStaff && isOwner" @click="openUpdateReviewModal" class="bg-blue-500 text-white px-4 py-2 rounded mt-8 mr-4">Update Review</button>
         
         <!-- Modal for updating a review -->
         <div v-if="updateReviewModalOpen" class="fixed inset-0 z-50 overflow-auto flex items-center justify-center" @click.self="closeUpdateReviewModal">
@@ -36,8 +35,7 @@
             </form>
           </div>
         </div>
-        <button v-if="isOwner" @click="deleteReview" class="bg-red-500 text-white px-4 py-2 rounded">Delete Review</button>
-      </div>
+        <button v-if="isOwner" @click="deleteReview" class="bg-red-500 text-white px-4 py-2 rounded mt-8 ml-4">Delete Review</button>
     </div>
     <div v-else class="text-gray-500 mt-4">
       <p>Review not found</p>
