@@ -29,7 +29,7 @@
     <p v-else class="text-gray-500">No reviews yet.</p>
   </div>
 
-  <!-- Form for adding a new car -->
+  <!-- Form for adding a new review -->
   <form v-if="!isStaff" @submit.prevent="reviewCar" class="bg-gray-100 p-4">
     <div class="space-y-4">
       <div class="bg-white rounded-md shadow-md p-4">

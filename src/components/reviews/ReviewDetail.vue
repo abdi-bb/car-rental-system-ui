@@ -72,7 +72,6 @@ export default {
         this.updatedReview.description = this.review.description;
         
         this.isOwner = this.userId && this.review && parseInt(this.userId) === this.review.user_id;
-        console.log(this.isOwner);
       } catch(error) {
         console.error('Error fetching review data:', error);
         this.review = null;
