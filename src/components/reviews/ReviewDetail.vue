@@ -68,6 +68,11 @@ export default {
       try {
         const response = await axios.get(`http://127.0.0.1:8000/api/v1/cars/${this.$route.params.carId}/reviews/${this.$route.params.reviewId}`)
         this.review = response.data;
+
+        // Set initial values for the updatedReview object
+        this.updatedReview.rating = this.review.rating;
+        this.updatedReview.description = this.review.description;
+        
         this.isOwner = this.userId && this.review && parseInt(this.userId) === this.review.user_id;
         console.log(this.isOwner);
       } catch(error) {
