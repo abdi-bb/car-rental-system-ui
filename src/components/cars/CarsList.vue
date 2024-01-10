@@ -91,24 +91,30 @@
             />
           </div>
 
-          <div class="p-4">
-            <div class="flex items-center justify-between mb-2">
-              <h2 class="text-base font-semibold">{{ car.name }}({{ car.model }})</h2>
-              <!-- <p class="text-gray-600 mb-2">{{ car.gearbox }}</p> -->
-
-              <p class="text-black font-semibold text-sm">
-                ${{ car.price }} <span class="font-normal">/day</span>
-              </p>
+          <div class="flex flex-col">
+            <div class="flex justify-between items-center">
+              <h2 class="text-2xl font-semibold mb-2">
+                {{ car.name }}
+                <span class="text-lg font-medium">({{ car.model }})</span>
+              </h2>
+              <div class="flex pr-4">
+                <span class="text-gray-600 mr-1">
+                  <router-link :to="{ name: 'ReviewsList', params: { carId: car.id }}" class="text-blue-500 mt-3 ml-4 hover:underline">
+                    View Reviews
+                  </router-link>
+                </span>
+              </div>
             </div>
-
-            <!-- View Reviews link inside the loop -->
-            <router-link :to="{ name: 'ReviewsList', params: { carId: car.id }}" class="text-blue-500 hover:underline">
-              View Reviews
-            </router-link>
+            <!-- Book Now and View Reviews buttons side by side -->
+            <div class="flex">
+              <button class="bg-green-500 text-white px-4 py-2 rounded mt-2 mr-4">
+                Book Now
+              </button>
+            </div>
           </div>
         </div>
       </router-link>
-    </div>
+  </div>
   </div>
 </template>
 

@@ -447,6 +447,7 @@ export default {
 
           this.closeModal();
           console.log("Login successful");
+          this.$router.push({ name: "CarsList" });
         } else {
           this.loginError = "Invalid username or password";
         }

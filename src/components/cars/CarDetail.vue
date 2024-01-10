@@ -9,14 +9,14 @@
         Free cancellation up to 48 hours before pick-up.
       </div>
       <div class="flex flex-col w-full md:w-2/3 align-middle h-full">
-        <div
-          class="overflow-hidden border-b pb-4 pt-3 w-full md:w-96 h-60 md:h-auto rounded-lg"
-        >
-          <img
-            :src="car.images && car.images.length > 0 ? car.images[0].image : ''"
-            :alt="car.name"
-            class="w-full h-full object-center rounded-lg"
-          />
+        <div v-if="car.id" class="overflow-hidden border-b pb-4 pt-3 w-full md:w-96 h-60 md:h-auto rounded-lg">
+          <router-link :to="{ name: 'ImagesList', params: { carId: car.id }}">
+            <img
+              :src="car.images && car.images.length > 0 ? car.images[0].image : ''"
+              :alt="car.name"
+              class="w-full h-full object-center rounded-lg"
+            />
+          </router-link>
         </div>
 
         <div class="pt-4 pl-2 md:w-2/3">
