@@ -366,7 +366,7 @@ export default {
   },
 
   async created() {
-    const carId = this.$route.params.id;
+    const carId = this.$route.params.carId;
     this.car = await this.fetchCarDetails(carId);
     if (this.isAuthenticated) {
       await this.getUserInfo();
