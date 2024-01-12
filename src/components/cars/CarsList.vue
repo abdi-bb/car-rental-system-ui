@@ -79,7 +79,7 @@
       <router-link
         v-for="car in cars"
         :key="car.id"
-        :to="{ name: 'CarDetail', params: { carId: car.id, name: car.name } }"
+        :to="{ name: 'CarDetail', params: { carId: car.id } }"
         class="w-full sm:w-1/2 md:w-1/3 lg:w-1/3 xl:w-1/3 px-4 mb-8"
       >
         <div class="bg-white rounded-lg border">

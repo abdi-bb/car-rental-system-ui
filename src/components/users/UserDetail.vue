@@ -63,7 +63,7 @@ export default {
         const headers = {
           'Authorization': `JWT ${accessToken}`,
         };
-        const response = await fetch(`http://127.0.0.1:8000/api/v1/auth/users/${this.$route.params.id}`, { headers });
+        const response = await fetch(`http://127.0.0.1:8000/api/v1/auth/users/${this.$route.params.userId}`, { headers });
 
         if (response.ok) {
           const data = await response.json();
