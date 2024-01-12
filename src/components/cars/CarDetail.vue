@@ -1,9 +1,10 @@
 <template>
-  <div class="container mx-auto mt-8">
+  <div class="container mx-auto mt-24">
+    <h1 class="text-4xl font-bold mb-4">Car Detail</h1>
     <div class="flex flex-wrap pt-8 items-center justify-center">
       <!-- Car Image and Details -->
 
-      <div
+      <div v-if="!isStaff"
         class="md:w-2/3 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-md mb-4 text-lg mt-8 ml-2 mr-2"
       >
         Free cancellation up to 48 hours before pick-up.
@@ -26,12 +27,9 @@
               <span class="text-lg font-medium">({{ car.model }})</span>
             </h2>
             <div class="flex pr-4">
-              <span class="text-gray-600 mr-1" v-for="star in 5" :key="star">
-                <img
-                  src="../../assets/img/star.png"
-                  alt="star"
-                  class="w-3 h-3 cursor-pointer"
-                />
+            <!-- <span> -->
+              <span class="text-yellow-600 mr-1" v-for="star in car.stars" :key="star">
+                ★
               </span>
             </div>
           </div>
@@ -64,7 +62,7 @@
           </div>
         </div>
 
-        <div class="md:w-full mb-4 ml-2 mr-2">
+        <div v-if="!isStaff" class="md:w-full mb-4 ml-2 mr-2">
           <div
             class="bg-white rounded-lg overflow-hidden border border-gray-300 p-5"
           >
@@ -117,14 +115,14 @@
           </div>
         </div>
 
-        <div
+        <div v-if="!isStaff"
           class="md:w-2/3 bg-green-100 border-l-4 border-green-500 text-green-700 p-2 rounded-md shadow-md mb-4 text-lg ml-2 mr-2"
         >
           Bring the receipt at the pick-up.
         </div>
 
         <!-- Booking Form -->
-        <div class="w-full md:w-1/3 bg-gray-100 p-4 ml-2 mr-2">
+        <div v-if="!isStaff" class="w-full md:w-1/3 bg-gray-100 p-4 ml-2 mr-2">
           <h3 class="text-xl font-semibold mb-4">Book Now</h3>
 
           <form v-if="isAuthenticated" @submit.prevent="bookNow">
@@ -244,6 +242,7 @@ export default {
       },
       showReceiptModal: false,
       receiptData: null,
+      isStaff: false,
     };
   },
 
@@ -372,6 +371,9 @@ export default {
     if (this.isAuthenticated) {
       await this.getUserInfo();
     }
+    this.$store.dispatch("initializeApp").then(() => {
+      this.isStaff = this.$store.state.isStaff;
+    });
   },
 };
 </script>
