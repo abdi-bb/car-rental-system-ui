@@ -52,7 +52,7 @@ const routes = [
     component: CarsList
   },
   {
-    path: '/car/:id',
+    path: '/car/:carId',
     name: 'CarDetail',
     component: CarDetail,
     props: true
@@ -83,7 +83,7 @@ const routes = [
     component: UsersList
   },
   {
-    path: '/user/:id',
+    path: '/user/:userId',
     name: 'UserDetail',
     component: UserDetail,
   },
@@ -98,7 +98,7 @@ const routes = [
     component: BookingsList
   },
   {
-    path: '/booking/:id',
+    path: '/booking/:bookingId',
     name: 'BookingDetail',
     component: BookingDetail,
   },

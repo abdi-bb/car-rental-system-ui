@@ -25,7 +25,7 @@
           <div class=" mb-2">
             <span v-for="star in car.stars" :key="star" class="text-yellow-500 text-xl">★</span>
           </div>
-          <router-link :to="{ name: 'CarDetail', params: { id: car.id }}">
+          <router-link :to="{ name: 'CarDetail', params: { carId: car.id }}">
             <!-- Check if the car has images before displaying -->
             <img v-if="car.images && car.images.length > 0" :src="car.images[0].image" :alt="car.name" class="w-full max-w-lg mx-auto h-auto" />
           </router-link>

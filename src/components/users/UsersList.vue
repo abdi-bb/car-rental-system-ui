@@ -16,7 +16,7 @@
           <td>{{ user.last_name || 'N/A'}}</td>
           <td>{{ user.phone_number || 'N/A' }}</td>
           <td>
-            <router-link :to="{ name: 'UserDetail', params: { id: user.id }}">
+            <router-link :to="{ name: 'UserDetail', params: { userId: user.id }}">
               Details
             </router-link>
           </td>
