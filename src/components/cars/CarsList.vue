@@ -1,16 +1,17 @@
 <template>
   <div class="mt-24">
     <h1 class="text-4xl font-bold mb-4">Available Cars</h1>
-
-    <!-- Button to open the modal -->
-    <button v-if="isStaff" @click="openModal" class="bg-blue-500 text-white p-2 rounded">Add New Car</button>
+    <div class="flex justify-end">
+      <!-- Button to open the modal -->
+      <button v-if="isStaff" @click="openModal" class="bg-blue-500 text-white p-2 rounded justify-end mr-24">Add New Car</button>
+    </div>
 
     <!-- Modal for adding a new car -->
     <div v-if="isStaff && showModal" class="fixed inset-0 z-50 overflow-auto flex items-center justify-center" @click.self="closeModal">
       <div class="modal-content bg-white w-96 mx-auto p-6 rounded-lg shadow-lg" @click.stop>
         <span class="close absolute top-2 right-2 text-gray-600 cursor-pointer" @click="closeModal">&times;</span>
 
-        <h2 class="text-2xl font-bold mb-4">Add a New Car</h2>
+        <h2 class="text-2xl font-bold mb-4 flex justify-end">Add a New Car</h2>
 
         <!-- Form for adding a new car -->
         <form @submit.prevent="addCar" class="mb-8">
@@ -75,6 +76,8 @@
 
 
     <!-- Retrieve cars list -->
+    <div v-if="isLoading" class="text-center">Loading...</div>
+    <div v-else>
     <div class="container mx-auto mt-8 flex flex-wrap pt-16">
       <router-link
         v-for="car in cars"
@@ -114,6 +117,7 @@
           </div>
         </div>
       </router-link>
+      </div>
   </div>
   </div>
 </template>
@@ -141,6 +145,7 @@ export default {
       },
       showModal: false,
       isStaff: false,
+      isLoading: true,
     };
   },
   methods: {
@@ -151,6 +156,9 @@ export default {
         })
         .catch(error => {
           console.error('Error fetching data:', error);
+        })
+        .finally(() => {
+          this.isLoading = false;
         });
     },
     async addCar() {

@@ -58,17 +58,19 @@
               class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
             >
               <div class="py-1">
-                <router-link
-                  to="/bookings"
-                  class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                >
-                  <img
-                    src="../assets/img/manage.svg"
-                    alt="manage icon"
-                    class="h-4 w-4 mr-2"
-                  />
-                  My Bookings
-                </router-link>
+                <div v-if="!isStaff">
+                  <router-link
+                    to="/bookings"
+                    class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                  >
+                    <img
+                      src="../assets/img/manage.svg"
+                      alt="manage icon"
+                      class="h-4 w-4 mr-2"
+                    />
+                    My Bookings
+                  </router-link>
+                </div>
                 <router-link
                   :to="{ name: 'Me', params: { id: $store.state.userId } }"
                   class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
@@ -322,6 +324,7 @@ export default {
 
       loginError: "",
       formSubmitted: false,
+      isStaff: false,
     };
   },
   computed: {
@@ -503,6 +506,11 @@ export default {
     async bookNow() {
       this.$emit("book-now");
     },
+  },
+  created() {
+    this.$store.dispatch('initializeApp').then(() => {
+      this.isStaff = this.$store.state.isStaff;
+  });
   },
 };
 </script>
