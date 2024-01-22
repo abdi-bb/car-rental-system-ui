@@ -45,7 +45,6 @@
 
 <script>
 import axios from 'axios';
-import config from '../services/env.config';
 
 export default {
   name: 'Home',
@@ -58,7 +57,7 @@ export default {
   methods: {
   },
   created() {
-    const BASE_API_URL = config.VUE_APP_BASE_API_URL;
+    const BASE_API_URL = process.env.VUE_APP_BASE_API_URL;
     axios.get(`${BASE_API_URL}/cars`)
       .then(response => {
         this.featuredCars = response.data

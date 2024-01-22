@@ -130,8 +130,6 @@
   import { useRoute, useRouter } from 'vue-router';
   import axios from 'axios';
 
-  import config from '@/services/env.config';
-
   const store = useStore();
   const route = useRoute();
   const router = useRouter();
@@ -152,7 +150,7 @@
   const successMessage = ref(route.query.successMessage);
   const errorMessage = ref(route.query.errorMessage);
 
-  const BASE_API_URL = config.VUE_APP_BASE_API_URL;
+  const BASE_API_URL = process.env.VUE_APP_BASE_API_URL;
 
   const isStaff = computed(() => store.state.isStaff);
 
