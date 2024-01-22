@@ -56,8 +56,20 @@ export default {
       }
     },
     getImageUrl(relativeUrl) {
-      return relativeUrl && relativeUrl.startsWith('http') ? relativeUrl : `http://localhost:8000/${relativeUrl}`;
+      if (relativeUrl) {
+        const sanitizedRelativeUrl = relativeUrl.replace(/^\//, '');
+
+        if (sanitizedRelativeUrl.startsWith('http') || sanitizedRelativeUrl.startsWith('https')) {
+          return sanitizedRelativeUrl;
+        } else {
+          const fullUrl = `http://localhost:8000/${sanitizedRelativeUrl}`;
+          return fullUrl;
+        }
+      } else {
+        return 'https://via.placeholder.com/300x200';
+      }
     },
+
     async deleteImage() {
       try {
         const { carId, imageId } = this.$route.params;
