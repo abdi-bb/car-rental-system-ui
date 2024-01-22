@@ -32,7 +32,7 @@
           <!-- Check if the car has reviews before displaying -->
           <div v-if="car.reviews && car.reviews.length > 0" class="text-sm mb-4">
             <p>{{ car.reviews[0].description }}</p>
-            <p class="text-gray-500">- {{ car.reviews[0].user || 'Anonymous User' }}</p>
+            <p class="text-gray-500">- {{ car.reviews[0].username || 'Anonymous User' }}</p>
           </div>
           <router-link :to="{ name: 'CarsList' }" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 mt-4 rounded">View More Cars</router-link>
         </div>
