@@ -59,7 +59,6 @@
           <!-- Add other input fields for the remaining attributes of the Car model -->
 
           <button
-                @click="addCar"
                 class="bg-green-500 text-white px-4 py-2 rounded mt-4"
               >
                 Add Car
@@ -125,122 +124,84 @@
 
 
 
-<script>
+<script setup>
+import { ref, reactive, onMounted, computed } from 'vue';
+import { useStore } from 'vuex';
+import { useRoute, useRouter } from 'vue-router';
 import axios from 'axios';
-import { refreshToken } from '@/services/refresh.token';
 
-export default {
-  name: 'CarsList',
-  components: {},
-  data() {
-    return {
-      cars: [],
-      newCar: {
-        name: '',
-        model: '',
-        seat: 0,
-        door: 0,
-        gearbox: '',
-        price: 0.0,
-      },
-      showModal: false,
-      isStaff: false,
-      isLoading: true,
-    };
-  },
-  methods: {
-    fetchCars() {
-      axios.get('http://127.0.0.1:8000/api/v1/cars/')
-        .then(response => {
-          this.cars = response.data;
-        })
-        .catch(error => {
-          console.error('Error fetching data:', error);
-        })
-        .finally(() => {
-          this.isLoading = false;
-        });
-    },
-    async addCar() {
-      try {
-        const accessToken = localStorage.getItem('accessToken');
+import config from '@/services/env.config';
 
-        const headers = {
-          'Content-Type': 'application/json',
-          Authorization: `JWT ${accessToken}`,
-        };
+const store = useStore();
+const route = useRoute();
+const router = useRouter();
 
-        await axios.post('http://127.0.0.1:8000/api/v1/cars/', this.newCar, { headers });
+const cars = ref([]);
+const newCar = reactive({
+  name: '',
+  model: '',
+  seat: 0,
+  door: 0,
+  gearbox: '',
+  price: 0.0,
+});
 
-        // If the request is successful, update the cars list and reset the form
-        console.log('Car added successfully');
-        this.fetchCars();
-        this.newCar = {
-          name: '',
-          model: '',
-          seat: 0,
-          door: 0,
-          gearbox: '',
-          price: 0.0,
-        };
-      } catch (error) {
-        if (error.response && error.response.status === 401) {
-          // Unauthorized, try refreshing the token
-          try {
-            const newAccessToken = await refreshToken(this.$store);
-            // Retry the original request with the new access token
-            await this.addCarWithToken(newAccessToken);
-          } catch (refreshError) {
-            // Token refresh failed, handle accordingly
-            console.error('Token refresh failed:', refreshError);
-          }
-        } else {
-          // Handle other errors
-          console.error('Error adding car:', error);
-        }
-      }
-    },
+const showModal = ref(false);
+const isLoading = ref(true);
 
-    async addCarWithToken(newAccessToken) {
-      try {
-        const headers = {
-          'Content-Type': 'application/json',
-          Authorization: `JWT ${newAccessToken}`,
-        };
+const successMessage = ref(route.query.successMessage);
+const errorMessage = ref(route.query.errorMessage);
 
-        await axios.post('http://127.0.0.1:8000/api/v1/cars/', this.newCar, { headers });
 
-        // If the request is successful, update the cars list and reset the form
-        console.log('Car added successfully');
-        this.fetchCars();
-        this.newCar = {
-          name: '',
-          model: '',
-          seat: 0,
-          door: 0,
-          gearbox: '',
-          price: 0.0,
-        };
-      } catch (error) {
-        // Handle errors in the retry request if needed
-        console.error('Error adding car with new token:', error);
-      }
-    },
-    openModal() {
-      this.showModal = true;
-    },
-    closeModal() {
-      this.showModal = false;
-    },
-  },
-  created() {
-    this.fetchCars();
-    this.$store.dispatch('initializeApp').then(() => {
-      this.isStaff = this.$store.state.isStaff;
-  });
-  },
+const fetchCars = async () => {
+  try {
+    const BASE_API_URL = config.VUE_APP_BASE_API_URL;
+    const response = await axios.get(`${BASE_API_URL}/cars/`);
+    cars.value = response.data;
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    errorMessage.value = 'Error fetching data';
+  } finally {
+    isLoading.value = false;
+  }
 };
+
+const addCar = async () => {
+  try {
+    const accessToken = localStorage.getItem('accessToken');
+    const BASE_API_URL = config.VUE_APP_BASE_API_URL;
+    const headers = {
+      'Content-Type': 'application/json',
+      Authorization: `JWT ${accessToken}`,
+    };
+
+    await axios.post(`${BASE_API_URL}/cars/`, newCar, { headers });
+    fetchCars();
+    successMessage.value = 'Car added successfully';
+    closeModal();
+    router.push({ name: 'CarDetail', params: { carId: cars.value[cars.value.length - 1].id }, query: { successMessage: successMessage.value } });
+  } catch (error) {
+    if (error.response && error.response.status === 401) {
+      errorMessage.value = 'Unauthorized or expired token';
+      router.push({ name: 'Login', query: { errorMessage: errorMessage.value } });
+    } else {
+      errorMessage.value = 'Error adding car';
+    }
+  }
+};
+
+const openModal = () => {
+  showModal.value = true;
+};
+
+const closeModal = () => {
+  showModal.value = false;
+};
+
+onMounted(async () => {
+  await store.dispatch('intializeApp');
+  fetchCars();
+});
+
+const isStaff = computed(() => store.state.isStaff);
 </script>
-
-
-<style></style>
