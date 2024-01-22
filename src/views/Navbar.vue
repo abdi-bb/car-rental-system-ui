@@ -8,7 +8,27 @@
         <router-link to="/">
           <span class="text-black text-lg font-semibold">WheelsOnRent</span>
         </router-link>
+
+
+        <div v-if="isStaff && isAuthenticated" class="flex items-center">
+          <router-link to="/users">
+            <button
+              class="text-black border border-green-500 px-4 py-2 rounded focus:outline-none transition duration-300 ease-in-out hover:bg-green-500 hover:text-white mr-8 ml-8"
+            >
+              Users
+            </button>
+          </router-link>
+          <router-link to="/cars">
+            <button
+              class="text-black border border-green-500 px-4 py-2 rounded focus:outline-none transition duration-300 ease-in-out hover:bg-green-500 hover:text-white ml-8"
+            >
+              Cars
+            </button>
+          </router-link>
+        </div>
       </div>
+
+        
       <div class="flex items-center">
         <template v-if="!isAuthenticated">
           <button

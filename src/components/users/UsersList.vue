@@ -1,9 +1,10 @@
 <template>
-  <div>
-    <h2>Customers List</h2>
+  <div class="mt-24">
+    <h1 class="font-bold font-size-75">Customers List</h1>
     <table class="customer-table">
       <thead>
         <tr>
+          <th>ID</th>
           <th>First Name</th>
           <th>Last Name</th>
           <th>Phone Number</th>
@@ -12,6 +13,7 @@
       </thead>
       <tbody>
         <tr v-for="user in users" :key="user.id">
+          <td>{{ user.id }}</td>
           <td>{{ user.first_name || 'N/A'}}</td>
           <td>{{ user.last_name || 'N/A'}}</td>
           <td>{{ user.phone_number || 'N/A' }}</td>
@@ -26,51 +28,48 @@
   </div>
 </template>
 
-<script>
-import axios from 'axios';
-import { refreshToken } from '@/services/refresh.token';
+<script setup>
+  import { computed, defineProps, onMounted, reactive, ref } from 'vue';
+  import { useStore } from 'vuex';
+  import { useRoute, useRouter } from 'vue-router';
+  import axios from 'axios';
 
-export default {
-  data() {
-    return {
-      users: [],
-    };
-  },
-  methods: {
-    async fetchData() {
-      try {
-        const accessToken = localStorage.getItem('accessToken');
+  const store = useStore();
+  const route = useRoute();
+  const router = useRouter();
 
-        const headers = {
-          'Authorization': `JWT ${accessToken}`,
-        };
+  const users = ref([]);
 
-        const response = await axios.get('http://127.0.0.1:8000/api/v1/auth/users', { headers });
+  const BASE_API_URL = process.env.VUE_APP_BASE_API_URL;
 
-        this.users = response.data;
-      } catch (error) {
-        if (error.response && error.response.status === 401) {
-          try {
-            const newAccessToken = await refreshToken(this.$store);
-            const newHeaders = {
-              'Authorization': `JWT ${newAccessToken}`,
-            };
-            const response = await axios.get('http://127.0.0.1:8000/api/v1/auth/users', { headers: newHeaders });
+  const isStaff = computed(() => store.state.isStaff);
+  
+  const successMessage = ref(route.query.successMessage);
+  const errorMessage = ref(route.query.errorMessage);
 
-            this.users = response.data;
-          } catch (refreshError) {
-            console.error('Failed to refresh access token:', refreshError);
-          }
-        } else {
-          console.error('Error fetching data:', error);
-        }
+  const fetchData = async () => {
+    try {
+      const accessToken = localStorage.getItem('accessToken');
+      const headers = {
+        'Authorization': `JWT ${accessToken}`,
+      };
+
+      const response = await axios.get(`${BASE_API_URL}/auth/users/`, { headers });
+      users.value = response.data;
+    } catch (error) {
+      if (error.response && error.response.status === 401) {
+        errorMessage.value = 'You are not authorized to view this page.';
+      } else {
+        console.error('Error fetching data:', error);
+        errorMessage.value = 'Error fetching data';
       }
-    },
-  },
-  created() {
-    this.fetchData();
-  },
-};
+    }
+  };
+
+  onMounted(async () => {
+    await fetchData();
+  });
+
 </script>
 
 <style>

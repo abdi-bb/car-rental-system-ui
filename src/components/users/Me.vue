@@ -56,7 +56,7 @@
                   >Email</label
                 >
                 <input
-                  v-model="updatedEmail"
+                  v-model="updatedUser.email"
                   type="email"
                   id="updateEmail"
                   class="w-full p-2 border rounded"
@@ -67,7 +67,7 @@
                   >First Name</label
                 >
                 <input
-                  v-model="updatedFirstName"
+                  v-model="updatedUser.first_name"
                   type="text"
                   id="updateFirstName"
                   class="w-full p-2 border rounded"
@@ -78,7 +78,7 @@
                   >Last Name</label
                 >
                 <input
-                  v-model="updatedLastName"
+                  v-model="updatedUser.last_name"
                   type="text"
                   id="updateLastName"
                   class="w-full p-2 border rounded"
@@ -89,7 +89,7 @@
                   >Phone Number</label
                 >
                 <input
-                  v-model="updatedPhoneNumber"
+                  v-model="updatedUser.phone_number"
                   type="text"
                   id="updatePhoneNumber"
                   class="w-full p-2 border rounded"
@@ -113,98 +113,113 @@
       </div>
     </div>
   </template>
-  
-  <script>
-  export default {
-    data() {
-      return {
-        user: {},
-        showUpdateModal: false,
-        updatedEmail: "",
-        updatedFirstName: "",
-        updatedLastName: "",
-        updatedPhoneNumber: "",
+
+<script setup>
+  import { defineProps, computed, reactive, ref, onMounted } from "vue";
+  import { useStore } from "vuex";
+  import { useRoute, useRouter } from "vue-router";
+  import axios from "axios";
+
+  const store = useStore();
+  const route = useRoute();
+  const router = useRouter();
+
+  const user = ref({});
+  const updatedUser = reactive({
+    email: "",
+    first_name: "",
+    last_name: "",
+    phone_number: "",
+  });
+
+  const showUpdateModal = ref(false);
+
+  const successMessage = ref(route.query.successMessage);
+  const errorMessage = ref(route.query.errorMessage);
+
+  const accessToken = localStorage.getItem("accessToken");
+  const refreshToken = localStorage.getItem("refreshToken");
+
+  const BASE_API_URL = process.env.VUE_APP_BASE_API_URL;
+
+  const fetchUserAccount = async () => {
+    try {
+      const headers = {
+        Authorization: `JWT ${accessToken}`,
       };
-    },
-    methods: {
-      async fetchUserAccount() {
-        try {
-          const accessToken = localStorage.getItem('accessToken');
-  
-          const headers = {
-            'Authorization': `JWT ${accessToken}`,
-          };
-          const response = await fetch(`http://127.0.0.1:8000/api/v1/auth/users/me`, { headers });
-  
-          if (response.ok) {
-            const data = await response.json();
-            this.user = data;
-          } else {
-            console.error("Failed to fetch user account information");
-          }
-        } catch (error) {
-          console.error("Error during fetching user account information", error);
-        }
-      },
-  
-      openUpdateModal() {
-        this.updatedEmail = this.user.email;
-        this.updatedFirstName = this.user.first_name;
-        this.updatedLastName = this.user.last_name;
-        this.updatedPhoneNumber = this.user.phone_number;
-  
-        this.showUpdateModal = true;
-      },
-  
-      async updateAccount() {
-        try {
-          const requestBody = {
-            email: this.updatedEmail,
-            first_name: this.updatedFirstName,
-            last_name: this.updatedLastName,
-            phone_number: this.updatedPhoneNumber,
-          };
+      const response = await axios.get(`${BASE_API_URL}/auth/users/me`, {
+        headers,
+      });
 
-          const accessToken = localStorage.getItem('accessToken');
-          const headers = {
-            'Content-Type': 'application/json',
-            Authorization: `JWT ${accessToken}`,
-          };
-
-          const response = await fetch("http://localhost:8000/api/v1/auth/users/me/", {
-            method: "PUT",
-            headers: headers,
-            body: JSON.stringify(requestBody),
-          });
-  
-          if (response.ok) {
-            this.user.email = this.updatedEmail;
-            this.user.first_name = this.updatedFirstName;
-            this.user.last_name = this.updatedLastName;
-            this.user.phone_number = this.updatedPhoneNumber;
-
-            this.closeUpdateModal();
-            console.log("Account updated successfully");
-          } else {
-            console.error("Failed to update account");
-          }
-        } catch (error) {
-          console.error("Error during updating account", error);
-        }
-      },
-  
-      closeUpdateModal() {
-        this.showUpdateModal = false;
-
-        this.updatedEmail = "";
-        this.updatedFirstName = "";
-        this.updatedLastName = "";
-        this.updatedPhoneNumber = "";
-      },
-    },
-    async created() {
-      await this.fetchUserAccount();
-    },
+      if (response.status === 200) {
+        user.value = response.data;
+      } else {
+        errorMessage.value = "Failed to fetch user account information";
+      }
+    } catch (error) {
+      errorMessage.value = "Error during fetching user account information";
+    }
   };
-  </script>
+
+  const openUpdateModal = () => {
+    updatedUser.email = user.value.email;
+    updatedUser.first_name = user.value.first_name;
+    updatedUser.last_name = user.value.last_name;
+    updatedUser.phone_number = user.value.phone_number;
+
+    showUpdateModal.value = true;
+  };
+
+  const updateAccount = async () => {
+    try {
+      const requestBody = {
+        email: updatedUser.email,
+        first_name: updatedUser.first_name,
+        last_name: updatedUser.last_name,
+        phone_number: updatedUser.phone_number,
+      };
+
+      const headers = {
+        "Content-Type": "application/json",
+        Authorization: `JWT ${accessToken}`,
+      };
+
+      const response = await axios.put(
+        `${BASE_API_URL}/auth/users/me/`,
+        requestBody,
+        {
+          headers,
+        }
+      );
+
+      if (response.status === 200) {
+        user.value.email = updatedUser.email;
+        user.value.first_name = updatedUser.first_name;
+        user.value.last_name = updatedUser.last_name;
+        user.value.phone_number = updatedUser.phone_number;
+
+        closeUpdateModal();
+        successMessage.value = "Account updated successfully";
+      } else {
+        errorMessage.value = "Failed to update account";
+      }
+    } catch (error) {
+      errorMessage.value = "Error during updating account";
+    }
+  };
+
+  const closeUpdateModal = () => {
+    showUpdateModal.value = false;
+
+    updatedUser.email = "";
+    updatedUser.first_name = "";
+    updatedUser.last_name = "";
+    updatedUser.phone_number = "";
+  };
+
+  onMounted(async () => {
+    await fetchUserAccount();
+  });
+
+</script>
   
