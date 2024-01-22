@@ -199,7 +199,6 @@
   };
 
   onMounted(async () => {
-    await store.dispatch('intializeApp');
     fetchCars();
   });
 

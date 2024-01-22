@@ -334,12 +334,19 @@
 </template>
 
 <script setup>
-  import {reactive, ref, computed, onMounted} from 'vue';
+  import {reactive, ref, computed, onMounted, defineProps} from 'vue';
   import {useStore} from 'vuex';
   import {useRoute, useRouter} from 'vue-router';
   import axios from 'axios';
   import html2pdf from 'html2pdf.js';
 
+  const props  = defineProps({
+    carId: {
+      type: String,
+      required: true,
+    },
+  });
+  
   const store = useStore();
   const route = useRoute();
   const router = useRouter();
