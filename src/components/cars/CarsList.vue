@@ -125,83 +125,84 @@
 
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue';
-import { useStore } from 'vuex';
-import { useRoute, useRouter } from 'vue-router';
-import axios from 'axios';
+  import { ref, reactive, onMounted, computed } from 'vue';
+  import { useStore } from 'vuex';
+  import { useRoute, useRouter } from 'vue-router';
+  import axios from 'axios';
 
-import config from '@/services/env.config';
+  import config from '@/services/env.config';
 
-const store = useStore();
-const route = useRoute();
-const router = useRouter();
+  const store = useStore();
+  const route = useRoute();
+  const router = useRouter();
 
-const cars = ref([]);
-const newCar = reactive({
-  name: '',
-  model: '',
-  seat: 0,
-  door: 0,
-  gearbox: '',
-  price: 0.0,
-});
+  const cars = ref([]);
+  const newCar = reactive({
+    name: '',
+    model: '',
+    seat: 0,
+    door: 0,
+    gearbox: '',
+    price: 0.0,
+  });
 
-const showModal = ref(false);
-const isLoading = ref(true);
+  const showModal = ref(false);
+  const isLoading = ref(true);
 
-const successMessage = ref(route.query.successMessage);
-const errorMessage = ref(route.query.errorMessage);
+  const successMessage = ref(route.query.successMessage);
+  const errorMessage = ref(route.query.errorMessage);
+
+  const BASE_API_URL = config.VUE_APP_BASE_API_URL;
+
+  const isStaff = computed(() => store.state.isStaff);
 
 
-const fetchCars = async () => {
-  try {
-    const BASE_API_URL = config.VUE_APP_BASE_API_URL;
-    const response = await axios.get(`${BASE_API_URL}/cars/`);
-    cars.value = response.data;
-  } catch (error) {
-    console.error('Error fetching data:', error);
-    errorMessage.value = 'Error fetching data';
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-const addCar = async () => {
-  try {
-    const accessToken = localStorage.getItem('accessToken');
-    const BASE_API_URL = config.VUE_APP_BASE_API_URL;
-    const headers = {
-      'Content-Type': 'application/json',
-      Authorization: `JWT ${accessToken}`,
-    };
-
-    await axios.post(`${BASE_API_URL}/cars/`, newCar, { headers });
-    fetchCars();
-    successMessage.value = 'Car added successfully';
-    closeModal();
-    router.push({ name: 'CarDetail', params: { carId: cars.value[cars.value.length - 1].id }, query: { successMessage: successMessage.value } });
-  } catch (error) {
-    if (error.response && error.response.status === 401) {
-      errorMessage.value = 'Unauthorized or expired token';
-      router.push({ name: 'Login', query: { errorMessage: errorMessage.value } });
-    } else {
-      errorMessage.value = 'Error adding car';
+  const fetchCars = async () => {
+    try {
+      const response = await axios.get(`${BASE_API_URL}/cars/`);
+      cars.value = response.data;
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      errorMessage.value = 'Error fetching data';
+    } finally {
+      isLoading.value = false;
     }
-  }
-};
+  };
 
-const openModal = () => {
-  showModal.value = true;
-};
+  const addCar = async () => {
+    try {
+      const accessToken = localStorage.getItem('accessToken');
+      const headers = {
+        'Content-Type': 'application/json',
+        Authorization: `JWT ${accessToken}`,
+      };
 
-const closeModal = () => {
-  showModal.value = false;
-};
+      await axios.post(`${BASE_API_URL}/cars/`, newCar, { headers });
+      fetchCars();
+      successMessage.value = 'Car added successfully';
+      closeModal();
+      router.push({ name: 'CarDetail', params: { carId: cars.value[cars.value.length - 1].id }, query: { successMessage: successMessage.value } });
+    } catch (error) {
+      if (error.response && error.response.status === 401) {
+        errorMessage.value = 'Unauthorized or expired token';
+        router.push({ name: 'Login', query: { errorMessage: errorMessage.value } });
+      } else {
+        errorMessage.value = 'Error adding car';
+      }
+    }
+  };
 
-onMounted(async () => {
-  await store.dispatch('intializeApp');
-  fetchCars();
-});
+  const openModal = () => {
+    showModal.value = true;
+  };
 
-const isStaff = computed(() => store.state.isStaff);
+  const closeModal = () => {
+    showModal.value = false;
+  };
+
+  onMounted(async () => {
+    await store.dispatch('intializeApp');
+    fetchCars();
+  });
+
 </script>
