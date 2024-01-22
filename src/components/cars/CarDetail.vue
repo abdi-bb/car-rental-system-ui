@@ -333,129 +333,137 @@
   </div>
 </template>
 
-<script>
-import html2pdf from "html2pdf.js";
+<script setup>
+  import {reactive, ref, computed, onMounted} from 'vue';
+  import {useStore} from 'vuex';
+  import {useRoute, useRouter} from 'vue-router';
+  import axios from 'axios';
+  import html2pdf from 'html2pdf.js';
 
-export default {
-  name: "CarDetails",
-  data() {
-    return {
-      car: {},
-      updateCar: {},
-      bookingData: {
-        startDate: "",
-        endDate: "",
-      },
-      showReceiptModal: false,
-      receiptData: null,
-      isUpdateModalOpen: false,
-      isStaff: false,
-    };
-  },
+  const store = useStore();
+  const route = useRoute();
+  const router = useRouter();
 
-  computed: {
-    isAuthenticated() {
-      return this.$store.state.isAuthenticated;
-    },
-    userId() {
-      return this.$store.state.userId;
-    },
-  },
+  const car = ref({});
+  const updateCar = reactive({
+    name: '',
+    model: '',
+    gearbox: '',
+    seat: '',
+    door: '',
+    price: '',
+  });
+  const bookingData = reactive({
+    startDate: '',
+    endDate: '',
+  });
+  const carId = ref(route.params.carId);
 
-  methods: {
-    async fetchCarDetails(carId) {
-      const response = await fetch(`http://localhost:8000/api/v1/cars/${carId}/`);
-      const data = await response.json();
-      return data;
-    },
+  const showReceiptModal = ref(false);
+  const receiptData = ref(null);
+  const isUpdateModalOpen = ref(false);
 
-    closeModal() {
-      this.showReceiptModal = false;
-    },
-    async getUserInfo() {
-      try {
-        const response = await fetch("http://localhost:8000/api/v1/auth/users/me/", {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `JWT ${localStorage.getItem("accessToken")}`,
-          },
-        });
+  const successMessage = ref(route.query.successMessage || '');
+  const errorMessage = ref(route.query.errorMessage || '');
 
-        if (response.ok) {
-          const userData = await response.json();
-          this.$store.commit("setUserId", userData.id);
-        } else {
-          console.error("Failed to fetch user information");
-        }
-      } catch (error) {
-        console.error("Error during fetching user information", error);
+  const isAuthenticated = computed(() => store.state.isAuthenticated);
+  const isStaff = computed(() => store.state.isStaff);
+  const userId = computed(() => store.state.userId);
+
+  const BASE_API_URL = process.env.VUE_APP_BASE_API_URL;
+
+  const fetchCarDetails = async () => {
+    const response = await axios.get(`${BASE_API_URL}/cars/${carId.value}/`);
+    const data = response.data;
+    return data;
+  }
+
+  const getUserInfo = async () => {
+    try {
+      const accessToken = localStorage.getItem('accessToken');
+      const headers = {
+        'Content-Type': 'application/json',
+        Authorization: `JWT ${accessToken}`,
+      };
+      const response = await axios.get(`${BASE_API_URL}/auth/users/me/`, {
+        headers: headers,
+      });
+
+      if (response.status === 200) {
+        const userData = response.data;
+        store.commit('setUserId', userData.id);
+      } else {
+        errorMessage.value = 'Failed to fetch user information';
       }
-    },
+    } catch (error) {
+      errorMessage.value = 'Error during fetching user information';
+    }
+  }
 
-    async bookNow() {
-      try {
-        const carId = this.car.id;
-        const userId = this.userId;
+  const bookNow = async () => {
+    try {
+      const carId = car.value.id;
+      const userId = userId.value;
 
-        if (!userId) {
-          console.error("User ID not available");
-          return;
-        }
-
-        const response = await fetch(`http://localhost:8000/api/v1/bookings/`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `JWT ${localStorage.getItem("accessToken")}`,
-          },
-          body: JSON.stringify({
-            car: carId,
-            start_date: this.bookingData.startDate,
-            end_date: this.bookingData.endDate,
-            user: userId,
-          }),
-        });
-
-        if (response.ok) {
-          console.log("Booking successful");
-
-          const startDate = new Date(this.bookingData.startDate);
-          const endDate = new Date(this.bookingData.endDate);
-          const dateDiffInDays = Math.ceil(
-            (endDate - startDate) / (1000 * 60 * 60 * 24)
-          );
-          const basePrice = dateDiffInDays * this.car.price;
-
-          const taxRate = 0.15;
-          const taxAmount = basePrice * taxRate;
-          const totalPrice = basePrice + taxAmount;
-
-          this.receiptData = {
-            car_model: this.car.model,
-            car_name: this.car.name,
-            start_date: this.bookingData.startDate,
-            end_date: this.bookingData.endDate,
-            base_price: basePrice,
-            tax_amount: taxAmount,
-            total_price: totalPrice,
-          };
-
-          //console.log(this.receiptData);
-          this.showReceiptModal = true;
-        } else {
-          console.error("Booking failed");
-        }
-      } catch (error) {
-        console.error("Error during booking", error);
+      if (!userId) {
+        errorMessage.value = 'User ID not available';
+        return;
       }
-    },
-    downloadReceipt() {
-      html2pdf(this.$refs.receiptContainer, {
+
+      const accessToken = localStorage.getItem('accessToken');
+      const headers = {
+        'Content-Type': 'application/json',
+        Authorization: `JWT ${accessToken}`,
+      };
+      const requestBody = {
+        car: carId,
+        start_date: bookingData.startDate,
+        end_date: bookingData.endDate,
+        user: userId,
+      };
+
+      const response = await axios.post(`${BASE_API_URL}/bookings/`, requestBody, {
+        headers: headers,
+      });
+
+      if (response.status === 201) {
+        successMessage.value = 'Booking successful';
+
+        const startDate = new Date(bookingData.startDate);
+        const endDate = new Date(bookingData.endDate);
+        const dateDiffInDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+        const basePrice = dateDiffInDays * car.value.price;
+
+        const taxRate = 0.15;
+        const taxAmount = basePrice * taxRate;
+        const totalPrice = basePrice + taxAmount;
+
+        receiptData.value = {
+          car_model: car.value.model,
+          car_name: car.value.name,
+          start_date: bookingData.startDate,
+          end_date: bookingData.endDate,
+          base_price: basePrice,
+          tax_amount: taxAmount,
+          total_price: totalPrice,
+        };
+
+        showReceiptModal = true;
+      } else {
+        errorMessage.value = 'Booking failed';
+      }
+     } catch (error) {
+        errorMessage.value = 'Error during booking';
+      }
+    }
+
+    const downloadReceipt = () => {
+      html2pdf(receiptContainer.value, {
         margin: 0.2,
-        filename: "receipt.pdf",
-        pagebreak: { after: ".sautDePage" },
+        filename: 'receipt.pdf',
+        pagebreak: { after: '.sautDePage' },
         image: {
-          type: "jpeg",
+          type: 'jpeg',
           quality: 2,
         },
         html2canvas: {
@@ -463,85 +471,79 @@ export default {
           letterRendering: true,
         },
         jsPDF: {
-          unit: "in",
-          format: "a4",
-          orientation: "portrait",
+          unit: 'in',
+          format: 'a4',
+          orientation: 'portrait',
         },
       });
-      this.$router.push({ name: "BookingsList" });
-    },
-    async deleteCar() {
-      try {
-        const accessToken = localStorage.getItem("accessToken");
-        const headers = {
-          'Content-Type': 'application/json',
-          Authorization: `JWT ${accessToken}`,
-        };
-        const response = await fetch(`http://localhost:8000/api/v1/cars/${this.car.id}/`, {
-          method: 'DELETE',
-          headers: headers,
-        });
-
-        if (response.ok) {
-          console.log("Car deleted successfully");
-          this.$router.push({ name: 'CarsList' });
-          // Optionally, you can navigate to another page or perform any other action
-        } else {
-          console.error("Error deleting car");
-        }
-      } catch (error) {
-        console.error("Error deleting car", error);
-      }
-    },
-    async updateCarDetails() {
-      try {
-        const accessToken = localStorage.getItem("accessToken");
-        const headers = {
-          'Content-Type': 'application/json',
-          Authorization: `JWT ${accessToken}`,
-        };
-        const response = await fetch(`http://localhost:8000/api/v1/cars/${this.car.id}/`, {
-          method: 'PUT',
-          headers: headers,
-          body: JSON.stringify(this.updateCar),
-        });
-
-        if (response.ok) {
-          console.log("Car updated successfully");
-          this.closeUpdateModal();
-          this.car = await this.fetchCarDetails(this.car.id);
-        } else {
-          console.error("Error updating car");
-        }
-      } catch (error) {
-        console.error("Error updating car", error);
-      }
-    },
-    openUpdateModal() {
-      this.updateCar = {
-        name: this.car.name,
-        model: this.car.model,
-        gearbox: this.car.gearbox,
-        seat: this.car.seat,
-        door: this.car.door,
-        price: this.car.price,
-      };
-      this.isUpdateModalOpen = true;
-    },
-    closeUpdateModal() {
-      this.isUpdateModalOpen = false;
-    },
-  },
-
-  async created() {
-    const carId = this.$route.params.carId;
-    this.car = await this.fetchCarDetails(carId);
-    if (this.isAuthenticated) {
-      await this.getUserInfo();
+      router.push({ name: 'BookingsList' });
     }
-    this.$store.dispatch('initializeApp').then(() => {
-      this.isStaff = this.$store.state.isStaff;
-    });
-  },
-};
+
+    const deleteCar = async () => {
+      try {
+        const accessToken = localStorage.getItem('accessToken');
+        const headers = {
+          'Content-Type': 'application/json',
+          Authorization: `JWT ${accessToken}`,
+        };
+        const response = await axios.delete(`${BASE_API_URL}/cars/${car.value.id}/`, {
+          headers: headers,
+        });
+
+        if (response.status === 204) {
+          successMessage.value = 'Car deleted successfully';
+          router.push({ name: 'CarsList' });
+        } else {
+          errorMessage.value = 'Error deleting car';
+        }
+      } catch (error) {
+        errorMessage.value = 'Error deleting car';
+      }
+    }
+
+    const updateCarDetails = async () => {
+      try {
+        const accessToken = localStorage.getItem('accessToken');
+        const headers = {
+          'Content-Type': 'application/json',
+          Authorization: `JWT ${accessToken}`,
+        };
+        const response = await axios.put(`${BASE_API_URL}/cars/${car.value.id}/`, updateCar, {
+          headers: headers,
+        });
+
+        if (response.status === 200) {
+          successMessage.value = 'Car updated successfully';
+          closeUpdateModal();
+          car.value = await fetchCarDetails();
+        } else {
+          errorMessage.value = 'Error updating car';
+        }
+      } catch (error) {
+        errorMessage.value = 'Error updating car';
+      }
+    }
+
+    const openUpdateModal = () => {
+      updateCar.name = car.value.name;
+      updateCar.model = car.value.model;
+      updateCar.gearbox = car.value.gearbox;
+      updateCar.seat = car.value.seat;
+      updateCar.door = car.value.door;
+      updateCar.price = car.value.price;
+      isUpdateModalOpen.value = true;
+    }
+
+    const closeUpdateModal = () => {
+      isUpdateModalOpen.value = false;
+    }
+
+  onMounted(async () => {
+    // carId.value = route.params.carId;
+    car.value = await fetchCarDetails();
+    if (isAuthenticated.value) {
+      await getUserInfo();
+    }
+  });
+
 </script>
