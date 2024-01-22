@@ -45,6 +45,7 @@
 
 <script>
 import axios from 'axios';
+import config from '../services/env.config';
 
 export default {
   name: 'Home',
@@ -57,7 +58,8 @@ export default {
   methods: {
   },
   created() {
-    axios.get('http://127.0.0.1:8000/api/v1/cars')
+    const BASE_API_URL = config.VUE_APP_BASE_API_URL;
+    axios.get(`${BASE_API_URL}/cars`)
       .then(response => {
         this.featuredCars = response.data
           .sort((a, b) => b.stars - a.stars) // Sort in descending order

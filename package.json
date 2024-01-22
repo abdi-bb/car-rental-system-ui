@@ -14,6 +14,7 @@
     "bootstrap": "^5.3.2",
     "core-js": "^3.8.3",
     "crypto-browserify": "^3.12.0",
+    "html2pdf.js": "^0.10.1",
     "jquery": "^3.7.1",
     "jsonwebtoken": "^9.0.2",
     "jwt-decode": "^4.0.0",
@@ -33,6 +34,9 @@
     "@vue/cli-plugin-router": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
     "autoprefixer": "^10.4.16",
+    "dotenv": "^16.3.2",
+    "os-browserify": "^0.3.0",
+    "path-browserify": "^1.0.1",
     "postcss": "^8.4.33"
   }
 }
