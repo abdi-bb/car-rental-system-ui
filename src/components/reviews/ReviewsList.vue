@@ -2,7 +2,23 @@
   <div class="mt-24">
     <h2 class="text-2xl font-bold mb-4">Reviews for Car {{ carName }}</h2>
 
-    
+    <!-- Success and error messages -->
+    <div v-if="successMessage" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-md mb-4 w-1/2">
+      <div class="flex items-center justify-between">
+        <span>{{ successMessage }}</span>
+        <button @click="clearMessages" class="text-green-700 hover:text-green-900 focus:outline-none">
+          X
+        </button>
+      </div>
+    </div>
+    <div v-if="errorMessage" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md mb-4 w-1/2">
+      <div class="flex items-center justify-between">
+        <span>{{ errorMessage }}</span>
+        <button @click="clearMessages" class="text-red-700 hover:text-red-900 focus:outline-none">
+          X
+        </button>
+      </div>
+    </div>
 
     <!-- Retreive the reviews from the API --> 
     <div v-if="isLoading" class="text-gray-500">Loading...</div>
@@ -78,8 +94,8 @@
 
   const carId = ref(route.params.carId);
 
-  const successMessage = ref(route.params.successMessage || '');
-  const errorMessage = ref(route.params.errorMessage || '');
+  const successMessage = ref(route.query.successMessage || '');
+  const errorMessage = ref(route.query.errorMessage || '');
 
   const accessToken = ref(localStorage.getItem('accessToken'));
 
@@ -90,9 +106,11 @@
     try {
       const response = await axios.get(`${BASE_API_URL}/cars/${carId.value}/reviews`);
       reviews.value = response.data;
+      console.log(reviews.value);
       fetchCarName();
     } catch (error) {
       errorMessage.value = error.response.data.detail;
+      router.push({ name: 'CarsList', params: { errorMessage: errorMessage.value } });
     }
   };
 
@@ -103,6 +121,7 @@
       isLoading.value = false; // Set loading to false once data is loaded
     } catch (error) {
       errorMessage.value = error.response.data.detail;
+      router.push({ name: 'CarsList', params: { errorMessage: errorMessage.value } });
     }
   };
 
@@ -122,12 +141,17 @@
         description: newReview.description,
       };
 
-      await axios.post(`${BASE_API_URL}/cars/${carId.value}/reviews/`, requestBody, { headers });
-      fetchReviews();
-      newReview.rating = '';
-      newReview.description = '';
+      const response = await axios.post(`${BASE_API_URL}/cars/${carId.value}/reviews/`, requestBody, { headers });
+
+      if (response.status === 201) {
+        const data = response.data;
+
+        successMessage.value = 'Review posted successfully!';
+        router.push({ name: 'ReviewDetail', params: { carId: carId.value, reviewId: data.id }, query: { successMessage: successMessage.value } });
+      }
     } catch (error) {
       errorMessage.value = error.response.data.detail;
+      router.push({ name: 'ReviewsList', params: { carId: carId.value }, query: { errorMessage: errorMessage.value} });
     }
   };
 
@@ -138,6 +162,13 @@
       readableDate: formatReadableDate(newReview.created_at),
     }));
   });
+
+  const clearMessages = () => {
+    successMessage.value = '';
+    errorMessage.value = '';
+
+    router.replace({ query: {} });
+  };
 
   onMounted(() => {
     fetchReviews();

@@ -6,6 +6,25 @@
       >
         Manage Your Booking
       </h1>
+
+      <!-- Success and error messages -->
+      <div v-if="successMessage" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-md mb-4 w-1/2">
+        <div class="flex items-center justify-between">
+          <span>{{ successMessage }}</span>
+          <button @click="clearMessages" class="text-green-700 hover:text-green-900 focus:outline-none">
+            X
+          </button>
+        </div>
+      </div>
+      <div v-if="errorMessage" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md mb-4 w-1/2">
+        <div class="flex items-center justify-between">
+          <span>{{ errorMessage }}</span>
+          <button @click="clearMessages" class="text-red-700 hover:text-red-900 focus:outline-none">
+            X
+          </button>
+        </div>
+      </div>
+
       <router-link to="/cars">
         <span
           class="py-8 px-1 text-lg md:text-sm text-blue-700 transition duration-300 mb-26 mr-2 ml-2"
@@ -63,6 +82,24 @@
       >
         <div class="bg-white p-8 rounded shadow-md">
           <h2 class="text-2xl font-semibold mb-4">Edit Booking</h2>
+
+          <!-- Success and error messages -->
+          <div v-if="successMessage" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-md mb-4 w-1/2">
+            <div class="flex items-center justify-between">
+              <span>{{ successMessage }}</span>
+              <button @click="clearMessages" class="text-green-700 hover:text-green-900 focus:outline-none">
+                X
+              </button>
+            </div>
+          </div>
+          <div v-if="errorMessage" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md mb-4 w-1/2">
+            <div class="flex items-center justify-between">
+              <span>{{ errorMessage }}</span>
+              <button @click="clearMessages" class="text-red-700 hover:text-red-900 focus:outline-none">
+                X
+              </button>
+            </div>
+          </div>
 
           <div class="mb-4">
             <label for="editStartDate" class="block text-gray-700"
@@ -181,7 +218,7 @@
       if (response.status !== 200) {
         errorMessage.value = "Failed to fetch booking data";
         console.error("Failed to fetch booking data:", response.statusText);
-        return;
+        router.push({ name: "BookingsList", query: { errorMessage: errorMessage.value } });
       }
 
       const bookingData = response.data;
@@ -207,13 +244,16 @@
         );
         successMessage.value = "Booking canceled successfully";
         console.log("Booking canceled successfully");
+        router.push({ name: "BookingsList", query: { successMessage: successMessage.value } });
       } else {
         errorMessage.value = "Failed to cancel booking";
         console.error("Failed to cancel booking:", deleteResponse.statusText);
+        router.push({ name: "BookingsList", query: { errorMessage: errorMessage.value } });
       }
     } catch (error) {
       errorMessage.value = "Error during canceling booking";
       console.error("Error during canceling booking", error);
+      router.push({ name: "BookingsList", query: { errorMessage: errorMessage.value } });
     }
   };
 
@@ -249,19 +289,29 @@
         showEditModal.value = false;
         successMessage.value = "Booking updated successfully";
         console.log("Booking updated successfully");
+        router.push({ name: "BookingsList", query: { successMessage: successMessage.value } });
       } else {
         errorMessage.value = "Failed to update booking";
         console.error("Failed to update booking");
+        router.push({ name: "BookingsList", query: { errorMessage: errorMessage.value } });
       }
     } catch (error) {
       errorMessage.value = "Error during updating booking";
       console.error("Error during updating booking", error);
+      router.push({ name: "BookingsList", query: { errorMessage: errorMessage.value } });
     }
   };
 
   const closeEditModal = () => {
     showEditModal.value = false;
     selectedBooking.value = null;
+  };
+
+  const clearMessages = () => {
+    successMessage.value = '';
+    errorMessage.value = '';
+
+    router.replace({ query: {} });
   };
 
   onMounted(async () => {

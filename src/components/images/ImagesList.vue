@@ -1,7 +1,25 @@
 <template>
   <div class="mt-24">
     <h2 class="text-2xl font-semibold mb-4">Car Images List</h2>
-    
+
+    <!-- Success and error messages -->
+    <div v-if="successMessage" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-md mb-4 w-1/2">
+      <div class="flex items-center justify-between">
+        <span>{{ successMessage }}</span>
+        <button @click="clearMessages" class="text-green-700 hover:text-green-900 focus:outline-none">
+          X
+        </button>
+      </div>
+    </div>
+    <div v-if="errorMessage" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md mb-4 w-1/2">
+      <div class="flex items-center justify-between">
+        <span>{{ errorMessage }}</span>
+        <button @click="clearMessages" class="text-red-700 hover:text-red-900 focus:outline-none">
+          X
+        </button>
+      </div>
+    </div>
+
     <!-- Check if the user is staff, and show the upload form -->
     <div v-if="isStaff" class="mb-4">
       <h3 class="text-lg font-semibold mb-2">Upload Image</h3>
@@ -66,10 +84,12 @@
         carImages.value = data;
       } else {
         errorMessage.value = 'Error fetching car images';
+        router.push({ name: 'CarDetail', params: { carId: carId.value }, query: { errorMessage: 'Error fetching car images' } });
       }
     } catch (error) {
       errorMessage.value = 'Error fetching car images';
       carImages.value = [];
+      router.push({ name: 'CarDetail', params: { carId: carId.value }, query: { errorMessage: 'Error fetching car images' } });
     }
   };
 
@@ -99,17 +119,27 @@
 
       if (response.status === 201) {
         const data = response.data;
-        router.push({ name: 'ImageDetail', params: { carId: carId.value, imageId: data.id }, query: { successMessage: 'Image uploaded successfully' } });
+        successMessage.value = 'Image uploaded successfully';
+        router.push({ name: 'ImageDetail', params: { carId: carId.value, imageId: data.id }, query: { successMessage: successMessage.value } });
       } else {
         errorMessage.value = 'Error uploading image';
+        router.push({ name: 'CarDetail', params: { carId: carId.value }, query: { errorMessage: errorMessage.value } });
       }
     } catch (error) {
       errorMessage.value = 'Error uploading image';
+      router.push({ name: 'CarDetail', params: { carId: carId.value }, query: { errorMessage: errorMessage.value } });
     }
   };
 
   const handleFileChange = (event) => {
     imageFile.value = event.target.files[0];
+  };
+
+  const clearMessages = () => {
+    successMessage.value = '';
+    errorMessage.value = '';
+
+    router.replace({ query: {} });
   };
 
 </script>

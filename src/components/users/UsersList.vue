@@ -1,6 +1,25 @@
 <template>
   <div class="mt-24">
     <h1 class="font-bold font-size-75">Customers List</h1>
+
+    <!-- Success and error messages -->
+    <div v-if="successMessage" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-md mb-4 w-1/2">
+      <div class="flex items-center justify-between">
+        <span>{{ successMessage }}</span>
+        <button @click="clearMessages" class="text-green-700 hover:text-green-900 focus:outline-none">
+          X
+        </button>
+      </div>
+    </div>
+    <div v-if="errorMessage" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md mb-4 w-1/2">
+      <div class="flex items-center justify-between">
+        <span>{{ errorMessage }}</span>
+        <button @click="clearMessages" class="text-red-700 hover:text-red-900 focus:outline-none">
+          X
+        </button>
+      </div>
+    </div>
+
     <table class="customer-table">
       <thead>
         <tr>
@@ -40,16 +59,18 @@
 
   const users = ref([]);
 
+  const isStaff = computed(() => store.state.isStaff);
+
+  const accessToken = localStorage.getItem('accessToken');
+
   const BASE_API_URL = process.env.VUE_APP_BASE_API_URL;
 
-  const isStaff = computed(() => store.state.isStaff);
   
   const successMessage = ref(route.query.successMessage);
   const errorMessage = ref(route.query.errorMessage);
 
   const fetchData = async () => {
     try {
-      const accessToken = localStorage.getItem('accessToken');
       const headers = {
         'Authorization': `JWT ${accessToken}`,
       };
@@ -59,11 +80,20 @@
     } catch (error) {
       if (error.response && error.response.status === 401) {
         errorMessage.value = 'You are not authorized to view this page.';
+        router.push({ name: 'CarsList', query: { errorMessage: errorMessage.value } });
       } else {
         console.error('Error fetching data:', error);
         errorMessage.value = 'Error fetching data';
+        router.push({ name: 'CarsList', query: { errorMessage: errorMessage.value } });
       }
     }
+  };
+
+  const clearMessages = () => {
+    successMessage.value = '';
+    errorMessage.value = '';
+
+    router.replace({ query: {} });
   };
 
   onMounted(async () => {

@@ -6,6 +6,25 @@
         >
           Manage Your Account
         </h1>
+
+        <!-- Success and error messages -->
+        <div v-if="successMessage" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-md mb-4 w-1/2">
+          <div class="flex items-center justify-between">
+            <span>{{ successMessage }}</span>
+            <button @click="clearMessages" class="text-green-700 hover:text-green-900 focus:outline-none">
+              X
+            </button>
+          </div>
+        </div>
+        <div v-if="errorMessage" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md mb-4 w-1/2">
+          <div class="flex items-center justify-between">
+            <span>{{ errorMessage }}</span>
+            <button @click="clearMessages" class="text-red-700 hover:text-red-900 focus:outline-none">
+              X
+            </button>
+          </div>
+        </div>
+
         <router-link to="/cars">
           <span
             class="py-8 px-1 text-lg md:text-sm text-blue-700 transition duration-300 mb-26 mr-2 ml-2"
@@ -50,7 +69,25 @@
           >
             <div class="bg-white p-8 rounded shadow-md">
               <h2 class="text-2xl font-semibold mb-4">Update Account</h2>
-  
+
+              <!-- Success and error messages -->
+              <div v-if="successMessage" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-md mb-4 w-1/2">
+                <div class="flex items-center justify-between">
+                  <span>{{ successMessage }}</span>
+                  <button @click="clearMessages" class="text-green-700 hover:text-green-900 focus:outline-none">
+                    X
+                  </button>
+                </div>
+              </div>
+              <div v-if="errorMessage" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md mb-4 w-1/2">
+                <div class="flex items-center justify-between">
+                  <span>{{ errorMessage }}</span>
+                  <button @click="clearMessages" class="text-red-700 hover:text-red-900 focus:outline-none">
+                    X
+                  </button>
+                </div>
+              </div>
+
               <div class="mb-4">
                 <label for="updateEmail" class="block text-gray-700"
                   >Email</label
@@ -200,11 +237,14 @@
 
         closeUpdateModal();
         successMessage.value = "Account updated successfully";
+        router.push({ name: "Me", query: { successMessage: successMessage.value } });
       } else {
         errorMessage.value = "Failed to update account";
+        router.push({ name: "Me", query: { errorMessage: errorMessage.value } });
       }
     } catch (error) {
       errorMessage.value = "Error during updating account";
+      router.push({ name: "Me", query: { errorMessage: errorMessage.value } });
     }
   };
 
@@ -215,6 +255,13 @@
     updatedUser.first_name = "";
     updatedUser.last_name = "";
     updatedUser.phone_number = "";
+  };
+
+  const clearMessages = () => {
+    successMessage.value = "";
+    errorMessage.value = "";
+
+    router.replace({ query: {} });
   };
 
   onMounted(async () => {

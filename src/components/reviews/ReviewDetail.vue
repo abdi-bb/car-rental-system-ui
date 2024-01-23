@@ -1,6 +1,25 @@
 <template>
   <div class="mt-24">
     <h2 class="text-3xl font-bold mb-4">Review Detail</h2>
+
+    <!-- Success and error messages -->
+    <div v-if="successMessage" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-md mb-4 w-1/2">
+      <div class="flex items-center justify-between">
+        <span>{{ successMessage }}</span>
+        <button @click="clearMessages" class="text-green-700 hover:text-green-900 focus:outline-none">
+          X
+        </button>
+      </div>
+    </div>
+    <div v-if="errorMessage" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md mb-4 w-1/2">
+      <div class="flex items-center justify-between">
+        <span>{{ errorMessage }}</span>
+        <button @click="clearMessages" class="text-red-700 hover:text-red-900 focus:outline-none">
+          X
+        </button>
+      </div>
+    </div>
+
     <div v-if="review" class="bg-white rounded-md shadow-md p-6">
       <p class="text-lg font-semibold mb-2">Customer: {{ review.username }}</p>
       <p class="text-gray-700 mb-2">Car: {{ review.car_name }}</p>
@@ -18,6 +37,24 @@
             <span class="close absolute top-2 right-2 text-gray-600 cursor-pointer" @click="closeUpdateReviewModal">&times;</span>
 
             <h2 class="text-2xl font-bold mb-4">Update Review</h2>
+
+            <!-- Success and error messages -->
+            <div v-if="successMessage" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-md mb-4 w-1/2">
+              <div class="flex items-center justify-between">
+                <span>{{ successMessage }}</span>
+                <button @click="clearMessages" class="text-green-700 hover:text-green-900 focus:outline-none">
+                  X
+                </button>
+              </div>
+            </div>
+            <div v-if="errorMessage" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md mb-4 w-1/2">
+              <div class="flex items-center justify-between">
+                <span>{{ errorMessage }}</span>
+                <button @click="clearMessages" class="text-red-700 hover:text-red-900 focus:outline-none">
+                  X
+                </button>
+              </div>
+            </div>
 
             <!-- Form for updating a review -->
             <form @submit.prevent="updateReview" class="mb-8">
@@ -91,6 +128,7 @@
       errorMessage.value = 'Error fetching review data';
       console.error('Error fetching review data:', error);
       review.value = null;
+      router.push({ name: 'CarsList', query: { errorMessage: errorMessage.value } });
     }
   };
 
@@ -115,14 +153,17 @@
       if (response.status === 200) {
         review.value = response.data;
         closeUpdateReviewModal();
-        router.push({ name: 'ReviewDetail', params: { carId: carId.value, reviewId: reviewId.value }, query: { successMessage: 'Review updated successfully' } });
+        successMessage.value = 'Review updated successfully';
+        router.push({ name: 'ReviewDetail', params: { carId: carId.value, reviewId: reviewId.value }, query: { successMessage: successMessage.value } });
       } else {
         errorMessage.value = 'Error updating review';
         console.error('Error updating review:', response);
+        router.push({ name: 'ReviewDetail', params: { carId: carId.value, reviewId: reviewId.value }, query: { errorMessage: errorMessage.value } });
       }
     } catch(error) {
       errorMessage.value = 'Error updating review';
       console.error('Error updating review:', error);
+      router.push({ name: 'ReviewDetail', params: { carId: carId.value, reviewId: reviewId.value }, query: { errorMessage: errorMessage.value } });
     }
   };
 
@@ -136,14 +177,17 @@
         const response = await axios.delete(`${BASE_API_URL}/cars/${carId.value}/reviews/${reviewId.value}`, { headers });
 
         if (response.status === 204) {
-          router.push({ name: 'ReviewsList', query: { successMessage: 'Review deleted successfully' } });
+          successMessage.value = 'Review deleted successfully';
+          router.push({ name: 'ReviewsList', query: { successMessage: successMessage.value } });
         } else {
           errorMessage.value = 'Error deleting review';
           console.error('Error deleting review:', response);
+          router.push({ name: 'ReviewDetail', params: { carId: carId.value, reviewId: reviewId.value }, query: { errorMessage: errorMessage.value } });
         }
       } catch(error) {
         errorMessage.value = 'Error deleting review';
         console.error('Error deleting review:', error);
+        router.push({ name: 'ReviewDetail', params: { carId: carId.value, reviewId: reviewId.value }, query: { errorMessage: errorMessage.value } });
       }
     }
   };
@@ -154,6 +198,13 @@
 
   const closeUpdateReviewModal = () => {
     updateReviewModalOpen.value = false;
+  };
+
+  const clearMessages = () => {
+    successMessage.value = '';
+    errorMessage.value = '';
+
+    router.replace({ query: {} });
   };
 
   // Lifecycle hooks

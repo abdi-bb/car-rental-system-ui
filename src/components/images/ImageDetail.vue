@@ -1,6 +1,25 @@
 <template>
   <div class="mt-24">
     <h2 class="text-2xl font-semibold mb-4">Car Image Detail</h2>
+
+    <!-- Success and error messages -->
+    <div v-if="successMessage" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-md mb-4 w-1/2">
+      <div class="flex items-center justify-between">
+        <span>{{ successMessage }}</span>
+        <button @click="clearMessages" class="text-green-700 hover:text-green-900 focus:outline-none">
+          X
+        </button>
+      </div>
+    </div>
+    <div v-if="errorMessage" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md mb-4 w-1/2">
+      <div class="flex items-center justify-between">
+        <span>{{ errorMessage }}</span>
+        <button @click="clearMessages" class="text-red-700 hover:text-red-900 focus:outline-none">
+          X
+        </button>
+      </div>
+    </div>
+
     <img
       :src="getImageUrl(image && image.image)"
       alt="Car Image"
@@ -17,6 +36,25 @@
     <div v-if="isUpdateModalOpen" class="modal">
       <div class="modal-content">
         <h2>Update Image</h2>
+
+        <!-- Success and error messages -->
+        <div v-if="successMessage" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-md mb-4 w-1/2">
+          <div class="flex items-center justify-between">
+            <span>{{ successMessage }}</span>
+            <button @click="clearMessages" class="text-green-700 hover:text-green-900 focus:outline-none">
+              X
+            </button>
+          </div>
+        </div>
+        <div v-if="errorMessage" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md mb-4 w-1/2">
+          <div class="flex items-center justify-between">
+            <span>{{ errorMessage }}</span>
+            <button @click="clearMessages" class="text-red-700 hover:text-red-900 focus:outline-none">
+              X
+            </button>
+          </div>
+        </div>
+
         <input type="file" @change="handleFileChange" />
         <button @click="submitUpdate" class="mr-2">Update</button>
         <button @click="closeUpdateModal" class="ml-2">Cancel</button>
@@ -62,10 +100,12 @@
         image.value = data;
       } else {
         errorMessage.value = 'Error fetching car image data';
+        router.push({ name: 'ImagesList', params: { carId: carId.value } });
       }
     } catch (error) {
       errorMessage.value = 'Error fetching car image data';
       image.value = {};
+      router.push({ name: 'ImagesList', params: { carId: carId.value } });
     }
   };
 
@@ -100,12 +140,14 @@
 
       if (response.status === 204) {
         successMessage.value = 'Image deleted successfully';
-        router.push({ name: 'ImagesList', params: { carId: carId.value } });
+        router.push({ name: 'ImagesList', params: { carId: carId.value }, query: { successMessage: successMessage.value } });
       } else {
         errorMessage.value = 'Error deleting image';
+        router.push({ name: 'ImageDetail', params: { carId: carId.value, imageId: imageId.value }, query: { errorMessage: errorMessage.value } });
       }
     } catch (error) {
       errorMessage.value = 'Error deleting image';
+      router.push({ name: 'ImageDetail', params: { carId: carId.value, imageId: imageId.value }, query: { errorMessage: errorMessage.value } });
     }
   };
 
@@ -127,12 +169,14 @@
 
       if (response.status === 200) {
         successMessage.value = 'Image updated successfully';
-        router.push({ name: 'ImageDetail', params: { carId: carId.value, imageId: imageId.value } });
+        router.push({ name: 'ImageDetail', params: { carId: carId.value, imageId: imageId.value }, query: { successMessage: successMessage.value } });
       } else {
         errorMessage.value = 'Error updating image';
+        router.push({ name: 'ImageDetail', params: { carId: carId.value, imageId: imageId.value }, query: { errorMessage: errorMessage.value } });
       }
     } catch (error) {
       errorMessage.value = 'Error updating image';
+      router.push({ name: 'ImageDetail', params: { carId: carId.value, imageId: imageId.value }, query: { errorMessage: errorMessage.value } });
     }
   };
 
@@ -166,15 +210,24 @@
       );
 
       if (response.status === 200) {
-        successMessage.value = 'Image updated successfully';
-        router.push({ name: 'ImageDetail', params: { carId: carId.value, imageId: imageId.value } });
         closeUpdateModal();
+        successMessage.value = 'Image updated successfully';
+        router.push({ name: 'ImageDetail', params: { carId: carId.value, imageId: imageId.value }, query: { successMessage: successMessage.value } });
       } else {
         errorMessage.value = 'Error updating image';
+        router.push({ name: 'ImageDetail', params: { carId: carId.value, imageId: imageId.value }, query: { errorMessage: errorMessage.value } });
       }
     } catch (error) {
       errorMessage.value = 'Error updating image';
+      router.push({ name: 'ImageDetail', params: { carId: carId.value, imageId: imageId.value }, query: { errorMessage: errorMessage.value } });
     }
+  };
+
+  const clearMessages = () => {
+    successMessage.value = '';
+    errorMessage.value = '';
+
+    router.replace({ query: {} });
   };
 
   const beforeRouteUpdate = (to, from, next) => {

@@ -2,6 +2,24 @@
   <div class="container mx-auto mt-24">
     <h1 class="text-4xl font-bold mb-4">Car Detail</h1>
 
+    <!-- Success and error messages -->
+    <div v-if="successMessage" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-md mb-4 w-1/2">
+      <div class="flex items-center justify-between">
+        <span>{{ successMessage }}</span>
+        <button @click="clearMessages" class="text-green-700 hover:text-green-900 focus:outline-none">
+          X
+        </button>
+      </div>
+    </div>
+    <div v-if="errorMessage" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md mb-4 w-1/2">
+      <div class="flex items-center justify-between">
+        <span>{{ errorMessage }}</span>
+        <button @click="clearMessages" class="text-red-700 hover:text-red-900 focus:outline-none">
+          X
+        </button>
+      </div>
+    </div>
+
     <div class="flex justify-end">
         <!-- Delete Car Button (for isStaff) -->
         <button v-if="isStaff" @click="deleteCar" class="bg-red-500 text-white px-4 py-2 rounded mt-4 ml-4">
@@ -76,6 +94,25 @@
               >
                 <div class="bg-white p-8 rounded shadow-md">
                   <h2 class="text-2xl font-semibold mb-4">Update Car Details</h2>
+
+                  <!-- Success and error messages -->
+                  <div v-if="successMessage" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-md mb-4 w-1/2">
+                    <div class="flex items-center justify-between">
+                      <span>{{ successMessage }}</span>
+                      <button @click="clearMessages" class="text-green-700 hover:text-green-900 focus:outline-none">
+                        X
+                      </button>
+                    </div>
+                  </div>
+                  <div v-if="errorMessage" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md mb-4 w-1/2">
+                    <div class="flex items-center justify-between">
+                      <span>{{ errorMessage }}</span>
+                      <button @click="clearMessages" class="text-red-700 hover:text-red-900 focus:outline-none">
+                        X
+                      </button>
+                    </div>
+                  </div>
+
 
                   <div class="mb-4">
                     <label for="updateName" class="block text-gray-700 text-sm font-bold mb-2">
@@ -379,6 +416,8 @@
   const isStaff = computed(() => store.state.isStaff);
   const userId = computed(() => store.state.userId);
 
+  const accessToken = localStorage.getItem('accessToken');
+
   const BASE_API_URL = process.env.VUE_APP_BASE_API_URL;
 
   const fetchCarDetails = async () => {
@@ -389,7 +428,6 @@
 
   const getUserInfo = async () => {
     try {
-      const accessToken = localStorage.getItem('accessToken');
       const headers = {
         'Content-Type': 'application/json',
         Authorization: `JWT ${accessToken}`,
@@ -415,10 +453,9 @@
 
       if (!userId) {
         errorMessage.value = 'User ID not available';
-        return;
+        router.push({ name: 'Login', query: { errorMessage: errorMessage.value } });
       }
 
-      const accessToken = localStorage.getItem('accessToken');
       const headers = {
         'Content-Type': 'application/json',
         Authorization: `JWT ${accessToken}`,
@@ -459,10 +496,12 @@
         showReceiptModal.value = true;
       } else {
         errorMessage.value = 'Booking failed';
+        router.push({ name: 'BookingsList', query: { errorMessage: errorMessage.value } });
       }
      } catch (error) {
         errorMessage.value = 'Error during booking';
         console.error('Error during booking', error);
+        router.push({ name: 'BookingsList', query: { errorMessage: errorMessage.value } });
       }
     }
 
@@ -485,12 +524,12 @@
           orientation: 'portrait',
         },
       });
-      router.push({ name: 'BookingsList' });
+      successMessage.value = 'Booking successful';
+      router.push({ name: 'BookingsList', query: { successMessage: successMessage.value } });
     }
 
     const deleteCar = async () => {
       try {
-        const accessToken = localStorage.getItem('accessToken');
         const headers = {
           'Content-Type': 'application/json',
           Authorization: `JWT ${accessToken}`,
@@ -501,18 +540,19 @@
 
         if (response.status === 204) {
           successMessage.value = 'Car deleted successfully';
-          router.push({ name: 'CarsList' });
+          router.push({ name: 'CarsList', query: { successMessage: successMessage.value } });
         } else {
           errorMessage.value = 'Error deleting car';
+          router.push({ name: 'CarDetail', params: { carId: car.value.id }, query: { errorMessage: errorMessage.value } });
         }
       } catch (error) {
         errorMessage.value = 'Error deleting car';
+        router.push({ name: 'CarDetail', params: { carId: car.value.id }, query: { errorMessage: errorMessage.value } });
       }
     }
 
     const updateCarDetails = async () => {
       try {
-        const accessToken = localStorage.getItem('accessToken');
         const headers = {
           'Content-Type': 'application/json',
           Authorization: `JWT ${accessToken}`,
@@ -525,11 +565,14 @@
           successMessage.value = 'Car updated successfully';
           closeUpdateModal();
           car.value = await fetchCarDetails();
+          router.push({ name: 'CarDetail', params: { carId: car.value.id }, query: { successMessage: successMessage.value } });
         } else {
           errorMessage.value = 'Error updating car';
+          router.push({ name: 'CarDetail', params: { carId: car.value.id }, query: { errorMessage: errorMessage.value } });
         }
       } catch (error) {
         errorMessage.value = 'Error updating car';
+        router.push({ name: 'CarDetail', params: { carId: car.value.id }, query: { errorMessage: errorMessage.value } });
       }
     }
 
@@ -545,6 +588,13 @@
 
     const closeUpdateModal = () => {
       isUpdateModalOpen.value = false;
+    }
+
+    const clearMessages = () => {
+      successMessage.value = '';
+      errorMessage.value = '';
+
+      router.replace({ query: {} });
     }
 
   onMounted(async () => {

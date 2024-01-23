@@ -6,12 +6,48 @@
       <button v-if="isStaff" @click="openModal" class="bg-blue-500 text-white p-2 rounded justify-end mr-24">Add New Car</button>
     </div>
 
+    <!-- Success and error messages -->
+    <div v-if="successMessage" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-md mb-4 w-1/2">
+      <div class="flex items-center justify-between">
+        <span>{{ successMessage }}</span>
+        <button @click="clearMessages" class="text-green-700 hover:text-green-900 focus:outline-none">
+          X
+        </button>
+      </div>
+    </div>
+    <div v-if="errorMessage" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md mb-4 w-1/2">
+      <div class="flex items-center justify-between">
+        <span>{{ errorMessage }}</span>
+        <button @click="clearMessages" class="text-red-700 hover:text-red-900 focus:outline-none">
+          X
+        </button>
+      </div>
+    </div>
+
     <!-- Modal for adding a new car -->
     <div v-if="isStaff && showModal" class="fixed inset-0 z-50 overflow-auto flex items-center justify-center" @click.self="closeModal">
       <div class="modal-content bg-white w-96 mx-auto p-6 rounded-lg shadow-lg" @click.stop>
         <span class="close absolute top-2 right-2 text-gray-600 cursor-pointer" @click="closeModal">&times;</span>
 
         <h2 class="text-2xl font-bold mb-4 flex justify-end">Add a New Car</h2>
+
+        <!-- Success and error messages -->
+        <div v-if="successMessage" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-md mb-4 w-1/2">
+          <div class="flex items-center justify-between">
+            <span>{{ successMessage }}</span>
+            <button @click="clearMessages" class="text-green-700 hover:text-green-900 focus:outline-none">
+              X
+            </button>
+          </div>
+        </div>
+        <div v-if="errorMessage" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md mb-4 w-1/2">
+          <div class="flex items-center justify-between">
+            <span>{{ errorMessage }}</span>
+            <button @click="clearMessages" class="text-red-700 hover:text-red-900 focus:outline-none">
+              X
+            </button>
+          </div>
+        </div>
 
         <!-- Form for adding a new car -->
         <form @submit.prevent="addCar" class="mb-8">
@@ -122,8 +158,6 @@
 </template>
 
 
-
-
 <script setup>
   import { ref, reactive, onMounted, computed } from 'vue';
   import { useStore } from 'vuex';
@@ -186,6 +220,7 @@
         router.push({ name: 'Login', query: { errorMessage: errorMessage.value } });
       } else {
         errorMessage.value = 'Error adding car';
+        router.push({ name: 'CarsList', query: { errorMessage: errorMessage.value } });
       }
     }
   };
@@ -196,6 +231,13 @@
 
   const closeModal = () => {
     showModal.value = false;
+  };
+
+  const clearMessages = () => {
+    successMessage.value = '';
+    errorMessage.value = '';
+
+    router.replace({ query: {} });
   };
 
   onMounted(async () => {
