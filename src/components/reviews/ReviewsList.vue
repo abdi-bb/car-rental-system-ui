@@ -56,95 +56,91 @@
 
 </template>
 
-<script>
-import axios from 'axios';
-import DateService from '../../services/DateService';
+<script setup>
+  import { computed, reactive, ref, watch, onMounted } from 'vue';
+  import { useStore } from 'vuex';
+  import { useRoute, useRouter } from 'vue-router';
+  import axios from 'axios';
+  import DateService from '../../services/DateService';
 
-export default {
-  name: 'ReviewsList',
-  components: {},
-  data() {
-    return {
-      reviews: [],
-      carName: '',
-      isLoading: true,
-      newReview: {
-        rating: '',
-        description: '',
-      },
-      isStaff: false,
-    };
-  },
-  methods: {
-    fetchReviews() {
-      const carId = this.$route.params.carId;
-      axios.get(`http://127.0.0.1:8000/api/v1/cars/${carId}/reviews`)
-        .then(response => {
-          this.reviews = response.data;
-          this.fetchCarName();
-        })
-        .catch(error => {
-          console.error('Error fetching reviews:', error);
-        });
-    },
-    fetchCarName() {
-      const carId = this.$route.params.carId;
-      axios.get(`http://127.0.0.1:8000/api/v1/cars/${carId}/`)
-        .then(response => {
-          this.carName = response.data.name;
-          this.isLoading = false; // Set loading to false once data is loaded
-        })
-        .catch(error => {
-          console.error('Error fetching car name:', error);
-        });
-    },
-    // Access the formatReadableDate function from the imported DateService
-    formatReadableDate(dateString) {
-      return DateService.formatReadableDate(dateString);
-    },
-    async reviewCar() {
-      try {
-        const accessToken = localStorage.getItem('accessToken');
+  const store = useStore();
+  const route = useRoute();
+  const router = useRouter();
 
-        const headers = {
-          'Content-Type': 'application/json',
-          Authorization: `JWT ${accessToken}`,
-        };
+  const reviews = ref([]);
+  const carName = ref('');
+  const isLoading = ref(true);
+  const newReview = reactive({
+    rating: '',
+    description: '',
+  });
+  const isStaff = computed(() => store.state.isStaff);
 
-        const requestBody = {
-          rating: this.newReview.rating,
-          description: this.newReview.description,
-        };
+  const carId = ref(route.params.carId);
 
-        const carId = this.$route.params.carId;
-        await axios.post(`http://localhost:8000/api/v1/cars/${carId}/reviews/`, requestBody, { headers });
-        this.fetchReviews();
-        this.newReview = {
-          rating: '',
-          description: '',
-        };
-      } catch (error) {
-        console.error(error);
-      }
-    },
-  },
-  computed: {
-    formattedReviews() {
-      // Compute formattedReviews based on the existing reviews data
-      return this.reviews.map(newReview => ({
-        ...newReview,
-        readableDate: this.formatReadableDate(newReview.created_at),
-      }));
-    },
-  },
-  created() {
-    this.fetchReviews();
-    this.$store.dispatch('initializeApp').then(() => {
-      this.isStaff = this.$store.state.isStaff;
-    });
-  },
-};
+  const successMessage = ref(route.params.successMessage || '');
+  const errorMessage = ref(route.params.errorMessage || '');
+
+  const accessToken = ref(localStorage.getItem('accessToken'));
+
+  const BASE_API_URL = process.env.VUE_APP_BASE_API_URL;
+
+  // Functions
+  const fetchReviews = async () => {
+    try {
+      const response = await axios.get(`${BASE_API_URL}/cars/${carId.value}/reviews`);
+      reviews.value = response.data;
+      fetchCarName();
+    } catch (error) {
+      errorMessage.value = error.response.data.detail;
+    }
+  };
+
+  const fetchCarName = async () => {
+    try {
+      const response = await axios.get(`${BASE_API_URL}/cars/${carId.value}/`);
+      carName.value = response.data.name;
+      isLoading.value = false; // Set loading to false once data is loaded
+    } catch (error) {
+      errorMessage.value = error.response.data.detail;
+    }
+  };
+
+  const formatReadableDate = (dateString) => {
+    return DateService.formatReadableDate(dateString);
+  };
+
+  const reviewCar = async () => {
+    try {
+      const headers = {
+        'Content-Type': 'application/json',
+        Authorization: `JWT ${accessToken.value}`,
+      };
+
+      const requestBody = {
+        rating: newReview.rating,
+        description: newReview.description,
+      };
+
+      await axios.post(`${BASE_API_URL}/cars/${carId.value}/reviews/`, requestBody, { headers });
+      fetchReviews();
+      newReview.rating = '';
+      newReview.description = '';
+    } catch (error) {
+      errorMessage.value = error.response.data.detail;
+    }
+  };
+
+  const formattedReviews = computed(() => {
+    // Compute formattedReviews based on the existing reviews data
+    return reviews.value.map(newReview => ({
+      ...newReview,
+      readableDate: formatReadableDate(newReview.created_at),
+    }));
+  });
+
+  onMounted(() => {
+    fetchReviews();
+  });
+
 </script>
-
-<style>
-</style>

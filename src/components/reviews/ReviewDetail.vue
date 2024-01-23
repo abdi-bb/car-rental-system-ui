@@ -35,7 +35,7 @@
             </form>
           </div>
         </div>
-        <button v-if="isOwner" @click="deleteReview" class="bg-red-500 text-white px-4 py-2 rounded mt-8 ml-4">Delete Review</button>
+        <button v-if="isOwner || isStaff" @click="deleteReview" class="bg-red-500 text-white px-4 py-2 rounded mt-8 ml-4">Delete Review</button>
     </div>
     <div v-else class="text-gray-500 mt-4">
       <p>Review not found</p>
