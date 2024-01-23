@@ -43,108 +43,140 @@
   </div>
 </template>
 
-<script>
-import axios from 'axios';
-import DateService from '../../services/DateService';
+<script setup>
+  // Imports
+  import { computed, reactive, ref, watch, onMounted } from 'vue';
+  import { useStore } from 'vuex';
+  import { useRoute, useRouter } from 'vue-router';
+  import axios from 'axios';
+  import DateService from '../../services/DateService';
 
-export default {
-  data() {
-    return {
-      review: null,
-      updatedReview: {
-        rating: null,
-        description: null,
-      },
-      updateReviewModalOpen: false,
-      isStaff: false,
-      isOwner: false,
-      userId: null,
-    };
-  },
-  methods: {
-    async fetchReviewData() {
-      try {
-        const response = await axios.get(`http://127.0.0.1:8000/api/v1/cars/${this.$route.params.carId}/reviews/${this.$route.params.reviewId}`)
-        this.review = response.data;
+  // Variables
+  const store = useStore();
+  const route = useRoute();
+  const router = useRouter();
 
-        // Set initial values for the updatedReview object
-        this.updatedReview.rating = this.review.rating;
-        this.updatedReview.description = this.review.description;
-        
-        this.isOwner = this.userId && this.review && parseInt(this.userId) === this.review.user_id;
-      } catch(error) {
-        console.error('Error fetching review data:', error);
-        this.review = null;
-      }
-    },
-    formatReadableDate(dateString) {
-      return DateService.formatReadableDate(dateString);
-    },
-    async updateReview() {
-      try {
-        
-        const accessToken = localStorage.getItem('accessToken');
+  const review = ref(null);
+  const updatedReview = reactive({
+    rating: null,
+    description: null,
+  });
 
-        const headers = {
-          'Content-Type': 'application/json',
-          Authorization: `JWT ${accessToken}`,
-        };
-        
-        const requestBody = {
-          rating: this.updatedReview.rating,
-          description: this.updatedReview.description,
-        };
+  const updateReviewModalOpen = ref(false);
+  const isStaff = computed(() => store.state.isStaff);
+  const userId = computed(() => store.state.userId);
+  const isOwner = computed(() => userId.value && review.value && parseInt(userId.value) === review.value.user_id);
 
-        const response = await fetch(`http://localhost:8000/api/v1/cars/${this.$route.params.carId}/reviews/${this.$route.params.reviewId}/`, {
-          method: 'PUT',
-          headers: headers,
-          body: JSON.stringify(requestBody),
-        });
+  const carId = ref(route.params.carId);
+  const reviewId = ref(route.params.reviewId);
 
-        if (response.ok) {
-          const data = await response.json();
-          this.review = data;
-          this.closeUpdateReviewModal();
-          this.$router.push({ name: 'ReviewsList' });
-        } else {
-          console.error('Error updating review:', response);
-        }
-      } catch(error) {
-        console.error('Error updating review:', error);
-      }
-    },
-    deleteReview() {
-      const accessToken = localStorage.getItem('accessToken');
-      
+  // Messages
+  const successMessage = ref(route.query.successMessage || '');
+  const errorMessage = ref(route.query.errorMessage || '');
+
+  const accessToken = localStorage.getItem('accessToken');
+
+  const BASE_API_URL = process.env.VUE_APP_BASE_API_URL;
+
+  // Methods
+  const fetchReviewData = async () => {
+    try {
+      const response = await axios.get(`${BASE_API_URL}/cars/${carId.value}/reviews/${reviewId.value}`);
+      review.value = response.data;
+
+      // Set initial values for the updatedReview object
+      updatedReview.rating = review.value.rating;
+      updatedReview.description = review.value.description;
+    } catch(error) {
+      errorMessage.value = 'Error fetching review data';
+      console.error('Error fetching review data:', error);
+      review.value = null;
+    }
+  };
+
+  const formatReadableDate = (dateString) => {
+    return DateService.formatReadableDate(dateString);
+  };
+
+  const updateReview = async () => {
+    try {
       const headers = {
+        'Content-Type': 'application/json',
         Authorization: `JWT ${accessToken}`,
       };
 
-      if (confirm('Are you sure you want to delete this review?')) {
-        axios.delete(`http://127.0.0.1:8000/api/v1/cars/${this.$route.params.carId}/reviews/${this.$route.params.reviewId}`, { headers })
-          .then(() => {
-            this.$router.push({ name: 'ReviewsList' });
-          })
-          .catch(error => {
-            console.error('Error deleting review:', error);
-          });
+      const requestBody = {
+        rating: updatedReview.rating,
+        description: updatedReview.description,
+      };
+
+      const response = await axios.put(`${BASE_API_URL}/cars/${carId.value}/reviews/${reviewId.value}/`, requestBody, { headers });
+
+      if (response.status === 200) {
+        review.value = response.data;
+        closeUpdateReviewModal();
+        router.push({ name: 'ReviewDetail', params: { carId: carId.value, reviewId: reviewId.value }, query: { successMessage: 'Review updated successfully' } });
+      } else {
+        errorMessage.value = 'Error updating review';
+        console.error('Error updating review:', response);
       }
-    },
-    openUpdateReviewModal() {
-      this.updateReviewModalOpen = true;
-    },
-    closeUpdateReviewModal() {
-      this.updateReviewModalOpen = false;
-    },
-  },
-  created() {
-    this.$store.dispatch('initializeApp').then(() => {
-      this.isStaff = this.$store.state.isStaff;
-      this.userId = this.$store.state.userId;
-      this.fetchReviewData();
-    });
-  },
-};
+    } catch(error) {
+      errorMessage.value = 'Error updating review';
+      console.error('Error updating review:', error);
+    }
+  };
+
+  const deleteReview = async () => {
+    if (confirm('Are you sure you want to delete this review?')) {
+      try {
+        const headers = {
+          Authorization: `JWT ${accessToken}`,
+        };
+
+        const response = await axios.delete(`${BASE_API_URL}/cars/${carId.value}/reviews/${reviewId.value}`, { headers });
+
+        if (response.status === 204) {
+          router.push({ name: 'ReviewsList', query: { successMessage: 'Review deleted successfully' } });
+        } else {
+          errorMessage.value = 'Error deleting review';
+          console.error('Error deleting review:', response);
+        }
+      } catch(error) {
+        errorMessage.value = 'Error deleting review';
+        console.error('Error deleting review:', error);
+      }
+    }
+  };
+
+  const openUpdateReviewModal = () => {
+    updateReviewModalOpen.value = true;
+  };
+
+  const closeUpdateReviewModal = () => {
+    updateReviewModalOpen.value = false;
+  };
+
+  // Lifecycle hooks
+  onMounted(async () => {
+    const isStaff = computed(() => store.state.isStaff);
+    const userId = computed(() => store.state.userId);
+    const isOwner = computed(() => userId.value && review.value && parseInt(userId.value) === review.value.user_id);
+
+    await fetchReviewData();
+  });
+
+  // Watchers
+  watch(() => route.params, async () => {
+    carId.value = route.params.carId;
+    reviewId.value = route.params.reviewId;
+    await fetchReviewData();
+  });
+
+  watch(() => route.query, () => {
+    successMessage.value = route.query.successMessage || '';
+    errorMessage.value = route.query.errorMessage || '';
+  });
+  
 </script>
 
 <style>
