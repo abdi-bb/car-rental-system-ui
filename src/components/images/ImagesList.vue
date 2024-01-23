@@ -15,7 +15,7 @@
       <router-link
         v-for="image in carImages"
         :key="image.id"
-        :to="{ name: 'ImageDetail', params: { carId: this.$route.params.carId, imageId: image.id } }"
+        :to="{ name: 'ImageDetail', params: { carId: carId, imageId: image.id } }"
         class="group relative overflow-hidden rounded-lg border border-gray-300 transition-transform duration-300 transform hover:scale-105"
       >
         <img
@@ -31,72 +31,85 @@
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      carImages: [],
-      imageFile: null,
-    };
-  },
-  computed: {
-    isStaff() {
-      console.log(this.$store.state.isStaff);
-      return this.$store.state.isStaff;
-    },
-  },
-  watch: {
-    '$route.params.carId': {
-      handler: 'fetchCarImages',
-      immediate: true,
-    },
-  },
-  methods: {
-    async fetchCarImages() {
-      try {
-        const response = await fetch(`http://127.0.0.1:8000/api/v1/cars/${this.$route.params.carId}/images/`);
-        this.carImages = await response.json();
-      } catch (error) {
-        console.error('Error fetching car images:', error);
+<script setup>
+  import { computed, reactive, ref, onMounted, watch } from 'vue';
+  import { useStore } from 'vuex';
+  import { useRoute, useRouter } from 'vue-router';
+  import axios from 'axios';
+  
+  const store = useStore();
+  const route = useRoute();
+  const router = useRouter();
+
+  const carId = ref(route.params.carId);
+
+  const carImages = ref([]);
+  const imageFile = ref(null);
+
+  const isStaff = computed(() => store.state.isStaff);
+
+  const successMessage = ref(route.query.successMessage || '');
+  const errorMessage = ref(route.query.errorMessage || '');
+
+  const accessToken = computed(() => store.state.accessToken);
+
+  const BASE_API_URL = process.env.VUE_APP_BASE_API_URL;
+
+  const fetchCarImages = async () => {
+    try {
+      const response = await axios.get(
+        `${BASE_API_URL}/cars/${carId.value}/images/`
+      );
+
+      if (response.status === 200) {
+        const data = response.data;
+        carImages.value = data;
+      } else {
+        errorMessage.value = 'Error fetching car images';
       }
-    },
-    getImageUrl(relativeUrl) {
-      return relativeUrl.startsWith('http') ? relativeUrl : `http://localhost:8000/${relativeUrl}`;
-    },
-    async uploadImage() {
-      try {
-        const accessToken = localStorage.getItem('accessToken');
-        const headers = {
-          Authorization: `JWT ${accessToken}`,
-        };
+    } catch (error) {
+      errorMessage.value = 'Error fetching car images';
+      carImages.value = [];
+    }
+  };
 
-        const formData = new FormData();
-        formData.append('image', this.imageFile);
+  watch(() => carId, fetchCarImages, { immediate: true });
 
-        const response = await fetch(`http://127.0.0.1:8000/api/v1/cars/${this.$route.params.carId}/images/`, {
-          method: 'POST',
-          headers: headers,
-          body: formData,
-        });
+  const getImageUrl = (relativeUrl) => {
+    return relativeUrl.startsWith('http')
+      ? relativeUrl
+      : `http://localhost:8000/${relativeUrl}`;
+  };
 
-        if (response.ok) {
-          console.log('Image uploaded successfully');
-          const uploadedImage = await response.json();
+  const uploadImage = async () => {
+    try {
+      const headers = {
+        'Content-Type': 'multipart/form-data',
+        Authorization: `JWT ${accessToken.value}`,
+      };
 
-          this.$router.push({ name: 'ImageDetail', params: { carId: this.$route.params.carId, imageId: uploadedImage.id } });
-        } else {
-          console.error('Image upload failed');
-        }
-      } catch (error) {
-        console.error('Error uploading image:', error);
+      const formData = new FormData();
+      formData.append('image', imageFile.value);
+
+      const response = await axios.post(
+        `${BASE_API_URL}/cars/${carId.value}/images/`,
+        formData,
+        { headers }
+      );
+
+      if (response.status === 201) {
+        const data = response.data;
+        router.push({ name: 'ImageDetail', params: { carId: carId.value, imageId: data.id }, query: { successMessage: 'Image uploaded successfully' } });
+      } else {
+        errorMessage.value = 'Error uploading image';
       }
-    },
-    handleFileChange(event) {
-      this.imageFile = event.target.files[0];
-    },
-  },
-};
+    } catch (error) {
+      errorMessage.value = 'Error uploading image';
+    }
+  };
+
+  const handleFileChange = (event) => {
+    imageFile.value = event.target.files[0];
+  };
+
 </script>
-
-<style>
-</style>
