@@ -1,41 +1,65 @@
 <template>
-    <div>
-      <h2>Booking Detail</h2>
-      <div v-if="booking">
-        <p>Customer: {{ booking.customer.user.username }}</p>
-        <p>Car: {{ booking.car.name }}</p>
-        <p>Booking Date: {{ booking.start_date }}</p>
-      </div>
-      <div v-else>
-        <p>Booking not found</p>
-      </div>
+  <div>
+    <h2>Booking Detail</h2>
+    <div v-if="booking">
+      <p>Customer: {{ booking.customer.user.username }}</p>
+      <p>Car: {{ booking.car.name }}</p>
+      <p>Booking Date: {{ booking.start_date }}</p>
     </div>
-  </template>
-  
-  <script>
+    <div v-else>
+      <p>Booking not found</p>
+    </div>
+  </div>
+</template>
+
+<script setup>
+  import { computed, reactive, ref, onMounted } from 'vue';
+  import { useStore } from 'vuex';
+  import { useRoute, useRouter } from 'vue-router';
   import axios from 'axios';
-  
-  export default {
-    data() {
-      return {
-        booking: null,
+
+  const store = useStore();
+  const route = useRoute();
+  const router = useRouter();
+
+  const booking = ref(null);
+  const bookingId = ref(route.params.bookingId);
+
+  const successMessage = ref(route.query.successMessage || '');
+  const errorMessage = ref(route.query.errorMessage || '');
+
+  const accessToken = computed(() => store.state.accessToken);
+
+  const BASE_API_URL = process.env.VUE_APP_BASE_API_URL;
+
+  const fetchBookingData = async () => {
+    try {
+      const headers = {
+        'Content-Type': 'application/json',
+        Authorization: `JWT ${accessToken.value}`,
       };
-    },
-    methods: {
-      fetchBookingData() {
-        axios.get(`http://127.0.0.1:8000/api/v1/bookings/${this.$route.params.id}`)
-          .then(response => {
-            this.booking = response.data;
-          })
-          .catch(error => {
-            console.error('Error fetching booking data:', error);
-            this.booking = null;
-          });
-      },
-    },
-    created() {
-      this.fetchBookingData();
-    },
+
+      const response = await axios.get(
+        `${BASE_API_URL}/bookings/${bookingId.value}/`,
+        { headers }
+      );
+
+      if (response.status === 200) {
+        const data = response.data;
+        booking.value = data;
+      } else {
+        errorMessage.value = 'Error fetching booking data';
+      }
+    } catch (error) {
+      errorMessage.value = 'Error fetching booking data';
+      booking.value = null;
+    }
   };
-  </script>
+
+  onMounted(async () => {
+    await fetchBookingData();
+  });
+        
+    
+</script>
   
