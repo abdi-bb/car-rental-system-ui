@@ -43,32 +43,35 @@
   </div>
 </template>
 
-<script>
-import axios from 'axios';
+<script setup>
+  import { computed, reactive, ref, onMounted } from 'vue';
+  import { useStore } from 'vuex';
+  import { useRoute, useRouter } from 'vue-router';
+  import axios from 'axios';
 
-export default {
-  name: 'Home',
-  data() {
-    return {
-      featuredCars: [],
-      bannerImage: require('@/assets/img/featured4.png'),
-    };
-  },
-  methods: {
-  },
-  created() {
-    const BASE_API_URL = process.env.VUE_APP_BASE_API_URL;
+  const store = useStore();
+  const route = useRoute();
+  const router = useRouter();
+
+  const featuredCars = ref([]);
+  const bannerImage = ref(require('@/assets/img/featured4.png'));
+
+  const successMessage = ref(route.query.successMessage || '');
+  const errorMessage = ref(route.query.errorMessage || '');
+
+  const BASE_API_URL = process.env.VUE_APP_BASE_API_URL;
+
+  onMounted(() => {
     axios.get(`${BASE_API_URL}/cars`)
       .then(response => {
-        this.featuredCars = response.data
+        featuredCars.value = response.data
           .sort((a, b) => b.stars - a.stars) // Sort in descending order
           .slice(0, 3); // Limit to the first 3 cars
       })
       .catch(error => {
         console.error('Error fetching featured cars data:', error);
       });
-  },
-};
+  });
 </script>
 
 <style scoped>
