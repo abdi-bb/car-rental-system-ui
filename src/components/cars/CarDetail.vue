@@ -364,6 +364,8 @@
     startDate: '',
     endDate: '',
   });
+  const receiptContainer = ref(null)
+
   const carId = ref(route.params.carId);
 
   const showReceiptModal = ref(false);
@@ -410,7 +412,6 @@
   const bookNow = async () => {
     try {
       const carId = car.value.id;
-      const userId = userId.value;
 
       if (!userId) {
         errorMessage.value = 'User ID not available';
@@ -426,7 +427,7 @@
         car: carId,
         start_date: bookingData.startDate,
         end_date: bookingData.endDate,
-        user: userId,
+        user: userId.value,
       };
 
       const response = await axios.post(`${BASE_API_URL}/bookings/`, requestBody, {
@@ -455,12 +456,13 @@
           total_price: totalPrice,
         };
 
-        showReceiptModal = true;
+        showReceiptModal.value = true;
       } else {
         errorMessage.value = 'Booking failed';
       }
      } catch (error) {
         errorMessage.value = 'Error during booking';
+        console.error('Error during booking', error);
       }
     }
 
