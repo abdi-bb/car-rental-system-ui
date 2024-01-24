@@ -38,24 +38,6 @@
 
             <h2 class="text-2xl font-bold mb-4">Update Review</h2>
 
-            <!-- Success and error messages -->
-            <div v-if="successMessage" class="md:w-2/3 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-md mb-4 text-sm mt-4 ml-2 mr-2">
-              <div class="flex items-center justify-between">
-                <span>{{ successMessage }}</span>
-                <button @click="clearMessages" class="text-green-700 hover:text-green-900 focus:outline-none">
-                  X
-                </button>
-              </div>
-            </div>
-            <div v-if="errorMessage" class="md:w-2/3 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md mb-4 text-sm mt-4 ml-2 mr-2">
-              <div class="flex items-center justify-between">
-                <span>{{ errorMessage }}</span>
-                <button @click="clearMessages" class="text-red-700 hover:text-red-900 focus:outline-none">
-                  X
-                </button>
-              </div>
-            </div>
-
             <!-- Form for updating a review -->
             <form @submit.prevent="updateReview" class="mb-8">
               <div class="flex flex-col mb-4">
@@ -118,6 +100,8 @@
   // Methods
   const fetchReviewData = async () => {
     try {
+      clearMessages();
+
       const response = await axios.get(`${BASE_API_URL}/cars/${carId.value}/reviews/${reviewId.value}`);
       review.value = response.data;
 
@@ -138,6 +122,8 @@
 
   const updateReview = async () => {
     try {
+      clearMessages();
+
       const headers = {
         'Content-Type': 'application/json',
         Authorization: `JWT ${accessToken}`,
@@ -168,6 +154,8 @@
   };
 
   const deleteReview = async () => {
+    clearMessages();
+
     if (confirm('Are you sure you want to delete this review?')) {
       try {
         const headers = {

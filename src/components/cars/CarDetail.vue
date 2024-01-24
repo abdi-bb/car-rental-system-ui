@@ -428,6 +428,8 @@
 
   const getUserInfo = async () => {
     try {
+      clearMessages();
+
       const headers = {
         'Content-Type': 'application/json',
         Authorization: `JWT ${accessToken}`,
@@ -449,6 +451,8 @@
 
   const bookNow = async () => {
     try {
+      clearMessages();
+
       const carId = car.value.id;
 
       if (!userId) {
@@ -530,6 +534,8 @@
 
     const deleteCar = async () => {
       try {
+      clearMessages();
+
         const headers = {
           'Content-Type': 'application/json',
           Authorization: `JWT ${accessToken}`,
@@ -553,6 +559,8 @@
 
     const updateCarDetails = async () => {
       try {
+      clearMessages();
+
         const headers = {
           'Content-Type': 'application/json',
           Authorization: `JWT ${accessToken}`,

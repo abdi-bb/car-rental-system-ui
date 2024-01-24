@@ -89,6 +89,8 @@
 
   const fetchUserAccount = async () => {
     try {
+      clearMessages();
+
       const headers = {
         'Authorization': `JWT ${accessToken}`,
       };
@@ -108,6 +110,8 @@
 
   const deleteUser = async () => {
     try {
+      clearMessages();
+
       const headers = {
       'Content-Type': 'application/json',
       'Authorization': `JWT ${accessToken}`,

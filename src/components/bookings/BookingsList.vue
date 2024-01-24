@@ -83,23 +83,6 @@
         <div class="bg-white p-8 rounded shadow-md">
           <h2 class="text-2xl font-semibold mb-4">Edit Booking</h2>
 
-          <!-- Success and error messages -->
-          <div v-if="successMessage" class="md:w-2/3 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-md mb-4 text-sm mt-4 ml-2 mr-2">
-            <div class="flex items-center justify-between">
-              <span>{{ successMessage }}</span>
-              <button @click="clearMessages" class="text-green-700 hover:text-green-900 focus:outline-none">
-                X
-              </button>
-            </div>
-          </div>
-          <div v-if="errorMessage" class="md:w-2/3 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md mb-4 text-sm mt-4 ml-2 mr-2">
-            <div class="flex items-center justify-between">
-              <span>{{ errorMessage }}</span>
-              <button @click="clearMessages" class="text-red-700 hover:text-red-900 focus:outline-none">
-                X
-              </button>
-            </div>
-          </div>
 
           <div class="mb-4">
             <label for="editStartDate" class="block text-gray-700"
@@ -167,6 +150,8 @@
 
   const fetchUserBookings = async () => {
     try {
+      clearMessages();
+
       const userId = store.state.userId;
       
       const headers = {
@@ -204,6 +189,8 @@
 
   const cancelBooking = async (bookingId) => {
     try {
+      clearMessages();
+
       const headers = {
         "Content-Type": "application/json",
         Authorization: `JWT ${accessToken}`,
@@ -258,12 +245,16 @@
   };
 
   const editBooking = (booking) => {
+    clearMessages();
+
     selectedBooking.value = { ...booking };
     showEditModal.value = true;
   };
 
   const updateBooking = async () => {
     try {
+      clearMessages();
+
       const headers = {
         "Content-Type": "application/json",
         Authorization: `JWT ${accessToken}`,

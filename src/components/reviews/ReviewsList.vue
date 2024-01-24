@@ -104,6 +104,8 @@
   // Functions
   const fetchReviews = async () => {
     try {
+      clearMessages();
+
       const response = await axios.get(`${BASE_API_URL}/cars/${carId.value}/reviews`);
       reviews.value = response.data;
       console.log(reviews.value);
@@ -116,6 +118,8 @@
 
   const fetchCarName = async () => {
     try {
+      clearMessages();
+
       const response = await axios.get(`${BASE_API_URL}/cars/${carId.value}/`);
       carName.value = response.data.name;
       isLoading.value = false; // Set loading to false once data is loaded
@@ -131,6 +135,8 @@
 
   const reviewCar = async () => {
     try {
+      clearMessages();
+
       const headers = {
         'Content-Type': 'application/json',
         Authorization: `JWT ${accessToken.value}`,

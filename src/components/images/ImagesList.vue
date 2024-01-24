@@ -75,6 +75,8 @@
 
   const fetchCarImages = async () => {
     try {
+      clearMessages();
+
       const response = await axios.get(
         `${BASE_API_URL}/cars/${carId.value}/images/`
       );
@@ -103,6 +105,8 @@
 
   const uploadImage = async () => {
     try {
+      clearMessages();
+
       const headers = {
         'Content-Type': 'multipart/form-data',
         Authorization: `JWT ${accessToken.value}`,

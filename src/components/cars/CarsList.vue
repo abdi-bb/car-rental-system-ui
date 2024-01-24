@@ -191,6 +191,8 @@
 
   const fetchCars = async () => {
     try {
+      clearMessages();
+
       const response = await axios.get(`${BASE_API_URL}/cars/`);
       cars.value = response.data;
     } catch (error) {
@@ -203,6 +205,8 @@
 
   const addCar = async () => {
     try {
+      clearMessages();
+
       const accessToken = localStorage.getItem('accessToken');
       const headers = {
         'Content-Type': 'application/json',
@@ -219,8 +223,8 @@
         errorMessage.value = 'Unauthorized or expired token';
         router.push({ name: 'Login', query: { errorMessage: errorMessage.value } });
       } else {
-        errorMessage.value = 'Error adding car';
-        router.push({ name: 'CarsList', query: { errorMessage: errorMessage.value } });
+        errorMessage.value = 'Error adding new car';
+        router.push({ query: { errorMessage: errorMessage.value } });
       }
     }
   };
