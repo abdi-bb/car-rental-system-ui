@@ -100,7 +100,6 @@
   // Methods
   const fetchReviewData = async () => {
     try {
-      clearMessages();
 
       const response = await axios.get(`${BASE_API_URL}/cars/${carId.value}/reviews/${reviewId.value}`);
       review.value = response.data;
@@ -122,7 +121,6 @@
 
   const updateReview = async () => {
     try {
-      clearMessages();
 
       const headers = {
         'Content-Type': 'application/json',
@@ -154,7 +152,6 @@
   };
 
   const deleteReview = async () => {
-    clearMessages();
 
     if (confirm('Are you sure you want to delete this review?')) {
       try {

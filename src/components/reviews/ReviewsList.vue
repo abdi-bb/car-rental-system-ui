@@ -104,7 +104,6 @@
   // Functions
   const fetchReviews = async () => {
     try {
-      clearMessages();
 
       const response = await axios.get(`${BASE_API_URL}/cars/${carId.value}/reviews`);
       reviews.value = response.data;
@@ -118,7 +117,6 @@
 
   const fetchCarName = async () => {
     try {
-      clearMessages();
 
       const response = await axios.get(`${BASE_API_URL}/cars/${carId.value}/`);
       carName.value = response.data.name;
@@ -135,7 +133,6 @@
 
   const reviewCar = async () => {
     try {
-      clearMessages();
 
       const headers = {
         'Content-Type': 'application/json',

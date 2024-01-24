@@ -91,7 +91,6 @@
 
   const fetchCarImage = async () => {
     try {
-      clearMessages();
 
       const response = await axios.get(
         `${BASE_API_URL}/cars/${carId.value}/images/${imageId.value}/`
@@ -130,7 +129,6 @@
 
   const deleteImage = async () => {
     try {
-      clearMessages();
 
       const headers = {
         'Content-Type': 'application/json',
@@ -157,7 +155,6 @@
 
   const updateImage = async () => {
     try {
-      clearMessages();
 
       const headers = {
         'Content-Type': 'multipart/form-data',
@@ -201,7 +198,6 @@
 
   const submitUpdate = async () => {
     try {
-      clearMessages();
 
       const headers = {
         'Content-Type': 'multipart/form-data',

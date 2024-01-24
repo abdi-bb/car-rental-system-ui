@@ -71,7 +71,6 @@
 
   const fetchData = async () => {
     try {
-      clearMessages();
 
       const headers = {
         'Authorization': `JWT ${accessToken}`,

@@ -181,7 +181,6 @@
 
   const fetchUserAccount = async () => {
     try {
-      clearMessages();
 
       const headers = {
         Authorization: `JWT ${accessToken}`,
@@ -211,7 +210,6 @@
 
   const updateAccount = async () => {
     try {
-      clearMessages();
 
       const requestBody = {
         email: updatedUser.email,

@@ -191,7 +191,6 @@
 
   const fetchCars = async () => {
     try {
-      clearMessages();
 
       const response = await axios.get(`${BASE_API_URL}/cars/`);
       cars.value = response.data;
@@ -205,7 +204,6 @@
 
   const addCar = async () => {
     try {
-      clearMessages();
 
       const accessToken = localStorage.getItem('accessToken');
       const headers = {

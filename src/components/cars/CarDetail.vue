@@ -428,7 +428,6 @@
 
   const getUserInfo = async () => {
     try {
-      clearMessages();
 
       const headers = {
         'Content-Type': 'application/json',
@@ -451,7 +450,6 @@
 
   const bookNow = async () => {
     try {
-      clearMessages();
 
       const carId = car.value.id;
 
@@ -534,7 +532,6 @@
 
     const deleteCar = async () => {
       try {
-      clearMessages();
 
         const headers = {
           'Content-Type': 'application/json',
@@ -548,18 +545,17 @@
           successMessage.value = 'Car deleted successfully';
           router.push({ name: 'CarsList', query: { successMessage: successMessage.value } });
         } else {
-          errorMessage.value = 'Error deleting car';
+          errorMessage.value = 'Sorry, Car is sheduled for booking by a customer!';
           router.push({ name: 'CarDetail', params: { carId: car.value.id }, query: { errorMessage: errorMessage.value } });
         }
       } catch (error) {
-        errorMessage.value = 'Error deleting car';
+        errorMessage.value = 'Sorry, Car is sheduled for booking by a customer!';
         router.push({ name: 'CarDetail', params: { carId: car.value.id }, query: { errorMessage: errorMessage.value } });
       }
     }
 
     const updateCarDetails = async () => {
       try {
-      clearMessages();
 
         const headers = {
           'Content-Type': 'application/json',

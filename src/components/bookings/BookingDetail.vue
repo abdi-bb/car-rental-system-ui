@@ -54,7 +54,6 @@
 
   const fetchBookingData = async () => {
     try {
-      clearMessages();
       
       const headers = {
         'Content-Type': 'application/json',

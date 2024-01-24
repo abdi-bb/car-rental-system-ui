@@ -150,7 +150,6 @@
 
   const fetchUserBookings = async () => {
     try {
-      clearMessages();
 
       const userId = store.state.userId;
       
@@ -189,7 +188,6 @@
 
   const cancelBooking = async (bookingId) => {
     try {
-      clearMessages();
 
       const headers = {
         "Content-Type": "application/json",
@@ -245,7 +243,6 @@
   };
 
   const editBooking = (booking) => {
-    clearMessages();
 
     selectedBooking.value = { ...booking };
     showEditModal.value = true;
@@ -253,7 +250,6 @@
 
   const updateBooking = async () => {
     try {
-      clearMessages();
 
       const headers = {
         "Content-Type": "application/json",
