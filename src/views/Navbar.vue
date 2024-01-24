@@ -10,22 +10,36 @@
         </router-link>
 
 
-        <div v-if="isStaff && isAuthenticated" class="flex items-center">
-          <router-link to="/users">
-            <button
-              class="text-black border border-green-500 px-4 py-2 rounded focus:outline-none transition duration-300 ease-in-out hover:bg-green-500 hover:text-white mr-8 ml-8"
-            >
-              Users
-            </button>
-          </router-link>
-          <router-link to="/cars">
-            <button
-              class="text-black border border-green-500 px-4 py-2 rounded focus:outline-none transition duration-300 ease-in-out hover:bg-green-500 hover:text-white ml-8"
-            >
-              Cars
-            </button>
-          </router-link>
-        </div>
+        <!--For Admin-->
+        <template v-if="isAdmin">
+          <div class="flex items-center">
+            <router-link to="/users">
+              <button
+                class="text-black border border-green-500 px-4 py-2 rounded focus:outline-none transition duration-300 ease-in-out hover:bg-green-500 hover:text-white mr-8 ml-8"
+              >
+                Users
+              </button>
+            </router-link>
+            <router-link to="/cars">
+              <button
+                class="text-black border border-green-500 px-4 py-2 rounded focus:outline-none transition duration-300 ease-in-out hover:bg-green-500 hover:text-white ml-8"
+              >
+                Cars
+              </button>
+            </router-link>
+          </div>
+        </template>
+        <template v-else-if="isAuthenticated">
+          <div class="flex items-center">
+            <router-link to="/cars">
+              <button
+                class="text-black border border-green-500 px-4 py-2 rounded focus:outline-none transition duration-300 ease-in-out hover:bg-green-500 hover:text-white mr-8 ml-8"
+              >
+                Cars
+              </button>
+            </router-link>
+          </div>
+        </template>
       </div>
 
         
@@ -78,7 +92,7 @@
               class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
             >
               <div class="py-1">
-                <div v-if="!isStaff">
+                <div v-if="!isAdmin">
                   <router-link
                     to="/bookings"
                     class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
@@ -133,12 +147,24 @@
             </button>
           </h2>
           <!-- Error message for login failure -->
-          <p
-            v-if="loginError"
-            class="md:w-2/3 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md mb-4 text-sm mt-4 ml-2 mr-2"
-          >
-            {{ loginError }}
-          </p>
+          <!-- Success and error messages -->
+          <div v-if="successMessage" class="md:w-2/3 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-md mb-4 text-sm mt-4 ml-2 mr-2">
+            <div class="flex items-center justify-between">
+              <span>{{ successMessage }}</span>
+              <button @click="clearMessages" class="text-green-700 hover:text-green-900 focus:outline-none">
+                X
+              </button>
+            </div>
+          </div>
+          <div v-if="errorMessage" class="md:w-2/3 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md mb-4 text-sm mt-4 ml-2 mr-2">
+            <div class="flex items-center justify-between">
+              <span>{{ errorMessage }}</span>
+              <button @click="clearMessages" class="text-red-700 hover:text-red-900 focus:outline-none">
+                X
+              </button>
+            </div>
+          </div>
+
           <div class="mb-4">
             <label for="username" class="block text-gray-700">Username</label>
             <input
@@ -195,6 +221,26 @@
               x
             </button>
           </h2>
+
+          <!-- Error message for registration failure -->
+          <!-- Success and error messages -->
+          <div v-if="successMessage" class="md:w-2/3 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-md mb-4 text-sm mt-4 ml-2 mr-2">
+            <div class="flex items-center justify-between">
+              <span>{{ successMessage }}</span>
+              <button @click="clearMessages" class="text-green-700 hover:text-green-900 focus:outline-none">
+                X
+              </button>
+            </div>
+          </div>
+          <div v-if="errorMessage" class="md:w-2/3 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md mb-4 text-sm mt-4 ml-2 mr-2">
+            <div class="flex items-center justify-between">
+              <span>{{ errorMessage }}</span>
+              <button @click="clearMessages" class="text-red-700 hover:text-red-900 focus:outline-none">
+                X
+              </button>
+            </div>
+          </div>
+
           <div class="mb-4">
             <label for="registerFirstName" class="block text-gray-700"
               >First Name</label
@@ -301,6 +347,12 @@
             >
               Password is required
             </p>
+            <p
+              v-else-if="formSubmitted && registerData.password.length < 6"
+              class="text-red-500"
+            >
+              Password must contain at least 6 characters
+            </p>
           </div>
           <button
             @click.prevent="submitForm"
@@ -350,11 +402,12 @@
   const loginError = ref("");
   const formSubmitted = ref(false);
 
-  const successMessage = ref("");
-  const errorMessage = ref("");
+  const successMessage = ref(route.query.successMessage || "");
+  const errorMessage = ref(route.query.errorMessage || "");
 
   const isAuthenticated = computed(() => store.state.isAuthenticated);
   const isStaff = computed(() => store.state.isStaff);
+  const isAdmin = computed(() => isStaff.value && isAuthenticated.value);
   // const username = computed(() => store.state.username);
   // const userId = computed(() => store.state.userId);
   
@@ -397,7 +450,7 @@
 
   const register = async () => {
     try {
-      loginError.value = "";
+      clearMessages();
 
       if (
         !registerData.first_name ||
@@ -408,6 +461,8 @@
         !registerData.password
       ) {
         console.error("All fields are required for registration.");
+        errorMessage.value = "All fields are required for registration.";
+        throw new Error("All fields are required for registration.");
       }
 
       const response = await axios.post(
@@ -417,20 +472,43 @@
 
       if (response.status === 201) {
         console.log("Registration successful");
-        await login();
+        successMessage.value = "Registration successful";
+        showLoginForm();
+
+        // Clear form data
+        registerData.first_name = "";
+        registerData.last_name = "";
+        registerData.username = "";
+        registerData.email = "";
+        registerData.phone_number = "";
+        registerData.password = "";
+
         closeModal();
       } else {
         console.error("Registration failed");
+        errorMessage.value = "Registration failed";
+        throw new Error("Registration failed");
       }
     } catch (error) {
-      console.error("Error during registration", error);
-      loginError.value = "Error during Sign Up";
+      if (axios.isAxiosError(error) && error.response && error.response.status === 400) {
+        const responseData = error.response.data;
+
+        if (responseData.password) {
+          errorMessage.value = 'Password must not similar to username and must not be entirely number';
+        } else if (responseData.username) {
+          console.error(responseData.username)
+          errorMessage.value = 'Username already exists.';
+        }
+      } else {
+        errorMessage.value = "Unexpected error during registration";
+        console.error("Error during registration", error);
+      }
     }
   };
 
   const login = async () => {
     try {
-      loginError.value = "";
+      clearMessages();
 
       if (!loginData.username || !loginData.password) {
         return;
@@ -472,18 +550,24 @@
 
         closeModal();
         console.log("Login successful");
+
+        successMessage.value = "Login successful";
         window.location.reload();
       } else {
         loginError.value = "Invalid username or password";
+        errorMessage.value = "Invalid username or password";
       }
     } catch (error) {
       console.error("Error during login", error);
       loginError.value = "Error during login";
+      errorMessage.value = "Invalid username or password";
     }
   };
 
   const logout = async () => {
     try {
+      clearMessages();
+
       const refreshToken = localStorage.getItem("refreshToken");
       const response = await axios.post(
         `${BASE_API_URL}/auth/jwt/logout/`,
@@ -509,8 +593,8 @@
         loginData.username = "";
         loginData.password = "";
 
+        successMessage.value = "Logout successful";
         router.push({ name: "Home" });
-        console.log("Logout successful");
       } else {
         console.error("Logout failed");
       }
@@ -525,6 +609,14 @@
 
   const bookNow = () => {
     router.push({ name: "Bookings" });
+  };
+
+  // Clear success and error messages
+  const clearMessages = () => {
+    successMessage.value = "";
+    errorMessage.value = "";
+
+    router.replace({ query: {} });
   };
 
 
