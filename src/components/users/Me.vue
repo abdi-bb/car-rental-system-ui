@@ -8,7 +8,7 @@
         </h1>
 
         <!-- Success and error messages -->
-        <div v-if="successMessage" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-md mb-4 w-1/2">
+        <div v-if="successMessage" class="md:w-2/3 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-md mb-4 text-sm mt-4 ml-2 mr-2">
           <div class="flex items-center justify-between">
             <span>{{ successMessage }}</span>
             <button @click="clearMessages" class="text-green-700 hover:text-green-900 focus:outline-none">
@@ -16,7 +16,7 @@
             </button>
           </div>
         </div>
-        <div v-if="errorMessage" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md mb-4 w-1/2">
+        <div v-if="errorMessage" class="md:w-2/3 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md mb-4 text-sm mt-4 ml-2 mr-2">
           <div class="flex items-center justify-between">
             <span>{{ errorMessage }}</span>
             <button @click="clearMessages" class="text-red-700 hover:text-red-900 focus:outline-none">
@@ -71,7 +71,7 @@
               <h2 class="text-2xl font-semibold mb-4">Update Account</h2>
 
               <!-- Success and error messages -->
-              <div v-if="successMessage" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-md mb-4 w-1/2">
+              <div v-if="successMessage" class="md:w-2/3 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-md mb-4 text-sm mt-4 ml-2 mr-2">
                 <div class="flex items-center justify-between">
                   <span>{{ successMessage }}</span>
                   <button @click="clearMessages" class="text-green-700 hover:text-green-900 focus:outline-none">
@@ -79,7 +79,7 @@
                   </button>
                 </div>
               </div>
-              <div v-if="errorMessage" class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md mb-4 w-1/2">
+              <div v-if="errorMessage" class="md:w-2/3 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md mb-4 text-sm mt-4 ml-2 mr-2">
                 <div class="flex items-center justify-between">
                   <span>{{ errorMessage }}</span>
                   <button @click="clearMessages" class="text-red-700 hover:text-red-900 focus:outline-none">
@@ -152,7 +152,7 @@
   </template>
 
 <script setup>
-  import { defineProps, computed, reactive, ref, onMounted } from "vue";
+  import { computed, reactive, ref, onMounted } from "vue";
   import { useStore } from "vuex";
   import { useRoute, useRouter } from "vue-router";
   import axios from "axios";
