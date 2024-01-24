@@ -319,218 +319,213 @@
   </nav>
 </template>
 
-<script>
-export default {
-  name: "CarRentalNavbar",
-  data() {
-    return {
-      showModal: false,
-      showRegister: false,
-      showDropdown: false,
+<script setup>
+  import { computed, reactive, ref, watch, onMounted } from "vue";
+  import { useStore } from "vuex";
+  import { useRoute, useRouter } from "vue-router";
+  import axios from "axios";
 
-      registerData: {
-        first_name: "",
-        last_name: "",
-        username: "",
-        email: "",
-        phone_number: "",
-        password: "",
-      },
+  const store = useStore();
+  const route = useRoute();
+  const router = useRouter();
 
-      loginData: {
-        username: "",
-        password: "",
-      },
+  const showModal = ref(false);
+  const showRegister = ref(false);
+  const showDropdown = ref(false);
 
-      loginError: "",
-      formSubmitted: false,
-      isStaff: false,
-    };
-  },
-  computed: {
-    isAuthenticated() {
-      return this.$store.state.isAuthenticated;
-    },
-    getUsername() {
-      return this.$store.state.username;
-    },
-  },
-  methods: {
-    showLoginModal() {
-      this.showModal = true;
-      this.showRegister = false;
-    },
-    showRegisterForm() {
-      this.showRegister = true;
-    },
-    showLoginForm() {
-      this.showRegister = false;
-    },
-    closeModal() {
-      this.showModal = false;
-      this.showRegister = false;
-    },
-    toggleDropdown() {
-      this.showDropdown = !this.showDropdown;
-    },
-    closeDropdown() {
-      this.showDropdown = false;
-    },
+  const registerData = reactive({
+    first_name: "",
+    last_name: "",
+    username: "",
+    email: "",
+    phone_number: "",
+    password: "",
+  });
 
-    async submitForm() {
-      this.formSubmitted = true;
-      if (this.showRegister) {
-        await this.register();
+  const loginData = reactive({
+    username: "",
+    password: "",
+  });
+
+  const loginError = ref("");
+  const formSubmitted = ref(false);
+
+  const successMessage = ref("");
+  const errorMessage = ref("");
+
+  const isAuthenticated = computed(() => store.state.isAuthenticated);
+  const isStaff = computed(() => store.state.isStaff);
+  // const username = computed(() => store.state.username);
+  // const userId = computed(() => store.state.userId);
+  
+  const BASE_API_URL = process.env.VUE_APP_BASE_API_URL;
+
+  const showLoginModal = () => {
+    showModal.value = true;
+    showRegister.value = false;
+  };
+
+  const showRegisterForm = () => {
+    showRegister.value = true;
+  };
+
+  const showLoginForm = () => {
+    showRegister.value = false;
+  };
+
+  const closeModal = () => {
+    showModal.value = false;
+    showRegister.value = false;
+  };
+
+  const toggleDropdown = () => {
+    showDropdown.value = !showDropdown.value;
+  };
+
+  const closeDropdown = () => {
+    showDropdown.value = false;
+  };
+
+  const submitForm = async () => {
+    formSubmitted.value = true;
+    if (showRegister.value) {
+      await register();
+    } else {
+      await login();
+    }
+  };
+
+  const register = async () => {
+    try {
+      loginError.value = "";
+
+      if (
+        !registerData.first_name ||
+        !registerData.last_name ||
+        !registerData.username ||
+        !registerData.email ||
+        !registerData.phone_number ||
+        !registerData.password
+      ) {
+        console.error("All fields are required for registration.");
+      }
+
+      const response = await axios.post(
+        `${BASE_API_URL}/auth/users/`,
+        registerData
+      );
+
+      if (response.status === 201) {
+        console.log("Registration successful");
+        await login();
+        closeModal();
       } else {
-        await this.login();
+        console.error("Registration failed");
       }
-    },
-    async register() {
-      try {
-        this.loginError = "";
+    } catch (error) {
+      console.error("Error during registration", error);
+      loginError.value = "Error during Sign Up";
+    }
+  };
 
-        if (
-          !this.registerData.first_name ||
-          !this.registerData.last_name ||
-          !this.registerData.username ||
-          !this.registerData.email ||
-          !this.registerData.phone_number ||
-          !this.registerData.password
-        ) {
-          console.error("All fields are required for registration.");
-        }
-        const headers = {
-          'Content-Type': 'application/json',
-        };
-        const response = await fetch('http://127.0.0.1:8000/api/v1/auth/users/', {
-          method: "POST",
-          headers: headers,
-          body: JSON.stringify(this.registerData),
-        });
+  const login = async () => {
+    try {
+      loginError.value = "";
 
-        if (response.ok) {
-          console.log("Registration successful");
-          await this.login();
-          this.closeModal();
-        } else {
-          console.error("Registration failed");
-        }
-      } catch (error) {
-        console.error("Error during registration", error);
-        this.loginError = "Error during Sign Up";
+      if (!loginData.username || !loginData.password) {
+        return;
       }
-    },
 
-    async login() {
-      try {
-        this.loginError = "";
+      const response = await axios.post(
+        `${BASE_API_URL}/auth/jwt/create/`,
+        loginData
+      );
 
-        if (!this.loginData.username || !this.loginData.password) {
-          return;
-        }
+      if (response.status === 200) {
+        const accessToken = response.data.access;
+        const refreshToken = response.data.refresh;
+        const username = loginData.username;
 
-        const headers = {
-          'Content-Type': 'application/json',
-        };
-        const response = await fetch('http://127.0.0.1:8000/api/v1/auth/jwt/create/', {
-          method: "POST",
-          headers: headers,
-          body: JSON.stringify(this.loginData),
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          const accessToken = data.access;
-          const refreshToken = data.refresh;
-          const username = this.loginData.username;
-
-          const userIdResponse = await fetch(
-            `http://localhost:8000/api/v1/auth/users/?search=${username}`,
-            {
-              headers: {
-                Authorization: `JWT ${accessToken}`,
-              },
-            }
-          );
-          const userData = await userIdResponse.json();
-          const userId = userData[0].id;
-
-          this.$store.commit("setAuthentication", {
-            isAuthenticated: true,
-            accessToken,
-            refreshToken,
-            username,
-          });
-          this.$store.commit("setUserId", userId);
-
-          localStorage.setItem("accessToken", accessToken);
-          localStorage.setItem("refreshToken", refreshToken);
-          localStorage.setItem("username", username);
-          localStorage.setItem("userId", userId);
-
-          this.closeModal();
-          console.log("Login successful");
-          // this.$router.push({ name: "CarsList" });
-        } else {
-          this.loginError = "Invalid username or password";
-        }
-      } catch (error) {
-        console.error("Error during login", error);
-        this.loginError = "Error during login";
-      }
-    },
-
-    async logout() {
-      try {
-        const refreshToken = localStorage.getItem("refreshToken");
-        const headers = {
-          'Content-Type': 'application/json',
-          Authorization: `JWT ${refreshToken}`,
-        };
-        const response = await fetch(
-          'http://localhost:8000/api/v1/auth/jwt/logout/',
+        const userIdResponse = await axios.get(
+          `${BASE_API_URL}/auth/users/?search=${username}`,
           {
-            method: "POST",
-            headers: headers,
-            body: JSON.stringify({ refresh: refreshToken }),
+            headers: {
+              Authorization: `JWT ${accessToken}`,
+            },
           }
         );
+        const userData = userIdResponse.data;
+        const userId = userData[0].id;
 
-        if (response.ok) {
-          this.$store.commit("setAuthentication", {
-            isAuthenticated: false,
-            accessToken: null,
-            username: null,
-          });
+        store.commit("setAuthentication", {
+          isAuthenticated: true,
+          accessToken,
+          refreshToken,
+          username,
+        });
+        store.commit("setUserId", userId);
 
-          localStorage.removeItem("accessToken");
-          localStorage.removeItem("refreshToken");
-          localStorage.removeItem("username");
-          localStorage.removeItem("userId");
-          this.loginData.username = "";
-          this.loginData.password = "";
+        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("refreshToken", refreshToken);
+        localStorage.setItem("username", username);
+        localStorage.setItem("userId", userId);
 
-          this.$router.push({ name: "Home" });
-          console.log("Logout successful");
-        } else {
-          console.error("Logout failed");
-        }
-      } catch (error) {
-        console.error("Error during logout", error);
+        closeModal();
+        console.log("Login successful");
+        window.location.reload();
+      } else {
+        loginError.value = "Invalid username or password";
       }
-    },
-    logoutFromOutside() {
-      this.logout();
-    },
+    } catch (error) {
+      console.error("Error during login", error);
+      loginError.value = "Error during login";
+    }
+  };
 
-    async bookNow() {
-      this.$emit("book-now");
-    },
-  },
-  created() {
-    this.$store.dispatch('initializeApp').then(() => {
-      this.isStaff = this.$store.state.isStaff;
-  });
-  },
-};
+  const logout = async () => {
+    try {
+      const refreshToken = localStorage.getItem("refreshToken");
+      const response = await axios.post(
+        `${BASE_API_URL}/auth/jwt/logout/`,
+        { refresh: refreshToken },
+        {
+          headers: {
+            Authorization: `JWT ${refreshToken}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        store.commit("setAuthentication", {
+          isAuthenticated: false,
+          accessToken: null,
+          username: null,
+        });
+
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("username");
+        localStorage.removeItem("userId");
+        loginData.username = "";
+        loginData.password = "";
+
+        router.push({ name: "Home" });
+        console.log("Logout successful");
+      } else {
+        console.error("Logout failed");
+      }
+    } catch (error) {
+      console.error("Error during logout", error);
+    }
+  };
+
+  const logoutFromOutside = () => {
+    logout();
+  };
+
+  const bookNow = () => {
+    router.push({ name: "Bookings" });
+  };
+
+
 </script>
