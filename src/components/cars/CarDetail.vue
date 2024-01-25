@@ -39,19 +39,23 @@
       >
         Free cancellation up to 48 hours before pick-up.
       </div> -->
-      <div class="flex justify-center items-center w-full h-full">
+      <div class="flex justify-center items-center w-full h-full mt-8">
         <div class="flex flex-col w-full md:w-2/3 align-middle h-full">
-          <div v-if="car.id" class="overflow-hidden border-b pb-4 pt-3 w-full md:w-96 h-60 md:h-auto rounded-lg">
+          <!--Car Image, Detail, Drop off/on-->
+          <div class="flex w-full md:w-2/3 h-1/2">
+          <!-- Car Image and Details -->
+          <div class="flex flex-col md:w-1/3 mr-4">
+          <div v-if="car.id" class="overflow-hidden border-b pb-4 pt-3 w-1/2 md:w-1/2 h-60 md:h-auto rounded-lg">
             <router-link :to="{ name: 'ImagesList', params: { carId: car.id }}">
               <img
                 :src="car.images && car.images.length > 0 ? car.images[0].image : ''"
                 :alt="car.name"
-                class="w-full h-full object-center rounded-lg"
+                class="w-full h-full object-center rounded-lg transition-transform transform hover:scale-105 duration-500 ease-in-out"
               />
             </router-link>
           </div>
 
-          <div class="pt-4 pl-2 md:w-2/3">
+          <div class="pt-4 pl-2 w-1/2">
             <div class="flex justify-between items-center">
               <h2 class="text-2xl font-semibold mb-2">
                 {{ car.name }}
@@ -89,6 +93,7 @@
                   ${{ car.price }} per day
                 </p>
               </div>
+            </div>
               <div
                   v-if="isUpdateModalOpen"
                   class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center"
@@ -206,9 +211,10 @@
             </div>
           </div>
 
-          <div v-if="!isStaff" class="w-full md:w-2/3 mb-4 ml-2 mr-2">
+          <!-- Drop off/on -->
+          <div class="w-1/2 md:w-1/2 mb-4 ml-8">
             <div
-              class="bg-white rounded-lg overflow-hidden border border-gray-300 p-5"
+              class="bg-blue-300 rounded-lg overflow-hidden border border-gray-300 p-5"
             >
               <h2 class="text-xl mb-4 font-bold">
                 Pick-up and Drop-off Information
@@ -256,6 +262,7 @@
                   <span class="">Bole International Airport, Addis Ababa.</span>
                 </p>
               </div>
+            </div>
             </div>
           </div>
 

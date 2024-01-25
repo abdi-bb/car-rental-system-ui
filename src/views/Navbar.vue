@@ -575,6 +575,10 @@
         console.error("Logout failed");
       }
     } catch (error) {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("username");
+      localStorage.removeItem("userId");
       console.error("Error during logout", error);
     }
   };
