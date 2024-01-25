@@ -329,12 +329,6 @@
             >
               Password is required
             </p>
-            <p
-              v-else-if="formSubmitted && registerData.password.length < 6"
-              class="text-red-500"
-            >
-              Password must contain at least 6 characters
-            </p>
           </div>
           <button
             @click.prevent="submitForm"
@@ -476,10 +470,10 @@
         const responseData = error.response.data;
 
         if (responseData.password) {
-          errorMessage.value = 'Password must not similar to username and must not be entirely number';
+          errorMessage.value = responseData.password[0];
         } else if (responseData.username) {
           console.error(responseData.username)
-          errorMessage.value = 'Username already exists.';
+          errorMessage.value = responseData.username[0];
         }
       } else {
         errorMessage.value = "Unexpected error during registration";
