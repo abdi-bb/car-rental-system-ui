@@ -577,7 +577,7 @@
           router.push({ name: 'CarDetail', params: { carId: car.value.id }, query: { errorMessage: errorMessage.value } });
         }
       } catch (error) {
-        errorMessage.value = 'Sorry, Car is sheduled for booking by a customer!';
+        errorMessage.value = error.response.data[0] || 'Error deleting car';
         router.push({ name: 'CarDetail', params: { carId: car.value.id }, query: { errorMessage: errorMessage.value } });
       }
     }
