@@ -211,11 +211,11 @@
         Authorization: `JWT ${accessToken}`,
       };
 
-      await axios.post(`${BASE_API_URL}/cars/`, newCar, { headers });
+      const response = await axios.post(`${BASE_API_URL}/cars/`, newCar, { headers });
       fetchCars();
       successMessage.value = 'Car added successfully';
       closeModal();
-      router.push({ name: 'CarDetail', params: { carId: cars.value[cars.value.length - 1].id }, query: { successMessage: successMessage.value } });
+      router.push({ name: 'CarDetail', params: { carId: response.data.id }, query: { successMessage: successMessage.value } });
     } catch (error) {
       if (error.response && error.response.status === 401) {
         errorMessage.value = 'Unauthorized or expired token';
