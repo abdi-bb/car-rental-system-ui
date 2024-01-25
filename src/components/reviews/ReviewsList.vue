@@ -153,7 +153,7 @@
         router.push({ name: 'ReviewDetail', params: { carId: carId.value, reviewId: data.id }, query: { successMessage: successMessage.value } });
       }
     } catch (error) {
-      errorMessage.value = error.response.data.detail;
+      errorMessage.value = error.response.data[0];
       router.push({ name: 'ReviewsList', params: { carId: carId.value }, query: { errorMessage: errorMessage.value} });
     }
   };
