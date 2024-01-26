@@ -33,7 +33,7 @@
           </div>
           <router-link :to="{ name: 'CarDetail', params: { carId: car.id }}">
             <!-- Check if the car has images before displaying -->
-            <img v-if="car.images && car.images.length > 0" :src="car.images[0].image" :alt="car.name" class="w-full max-w-lg mx-auto h-auto transform hover:scale-105 transition duration-500">
+            <img v-if="car.images && car.images.length > 0" :src="car.images[0].image" :alt="car.name" class="w-full max-w-lg mx-auto h-auto" />
           </router-link>
           <!-- Check if the car has reviews before displaying -->
           <div v-if="car.reviews && car.reviews.length > 0" class="text-sm mb-4">
