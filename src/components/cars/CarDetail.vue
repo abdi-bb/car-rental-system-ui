@@ -530,7 +530,11 @@
       }
      } catch (error) {
         // errorMessage.value = JSON.stringify(error.response.data, null, 2);
-        errorMessage.value = error.response.data.car[0] || error.response.data.start_date[0] || error.response.data.end_date[0] || 'Booking failed';
+        if (error.response.data && error.response.data.car && error.response.data.start_date && error.response.data.end_date) {
+          errorMessage.value = error.response.data.car[0] || error.response.data.start_date[0] || error.response.data.end_date[0] || 'Booking failed';
+        } else {
+          errorMessage.value = 'Booking failed - Please select valid dates';
+        }
         router.push({ query: { errorMessage: errorMessage.value } });
       }
     }
