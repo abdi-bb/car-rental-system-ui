@@ -187,58 +187,58 @@
   };
 
   const cancelBooking = async (bookingId) => {
-    try {
+    if (confirm("Are you sure you want to cancel this booking?")) {
+      try {
+        const headers = {
+          "Content-Type": "application/json",
+          Authorization: `JWT ${accessToken}`,
+        };
 
-      const headers = {
-        "Content-Type": "application/json",
-        Authorization: `JWT ${accessToken}`,
-      };
-
-
-      const response = await axios.get(
-        `${BASE_API_URL}/bookings/${bookingId}/`,
-        { headers }
-      );
-
-      if (response.status !== 200) {
-        errorMessage.value = "Failed to fetch booking data";
-        console.error("Failed to fetch booking data:", response.statusText);
-        router.push({ name: "BookingsList", query: { errorMessage: errorMessage.value } });
-      }
-
-      const bookingData = response.data;
-
-      // console.log("Booking Data:", bookingData);
-
-      // const carId = bookingData.car;
-
-      // await axios.patch(
-      //   `${BASE_API_URL}/cars/${carId}/`,
-      //   { status: 1 },
-      //   { headers }
-      // );
-
-      const deleteResponse = await axios.delete(
-        `${BASE_API_URL}/bookings/${bookingId}/`,
-        { headers }
-      );
-
-      if (deleteResponse.status === 204) {
-        bookings.value = bookings.value.filter(
-          (booking) => booking.id !== bookingId
+        const response = await axios.get(
+          `${BASE_API_URL}/bookings/${bookingId}/`,
+          { headers }
         );
-        successMessage.value = "Booking canceled successfully";
-        console.log("Booking canceled successfully");
-        router.push({ name: "BookingsList", query: { successMessage: successMessage.value } });
-      } else {
-        errorMessage.value = "Failed to cancel booking";
-        console.error("Failed to cancel booking:", deleteResponse.statusText);
+
+        if (response.status !== 200) {
+          errorMessage.value = "Failed to fetch booking data";
+          console.error("Failed to fetch booking data:", response.statusText);
+          router.push({ name: "BookingsList", query: { errorMessage: errorMessage.value } });
+        }
+
+        const bookingData = response.data;
+
+        // console.log("Booking Data:", bookingData);
+
+        // const carId = bookingData.car;
+
+        // await axios.patch(
+        //   `${BASE_API_URL}/cars/${carId}/`,
+        //   { status: 1 },
+        //   { headers }
+        // );
+
+        const deleteResponse = await axios.delete(
+          `${BASE_API_URL}/bookings/${bookingId}/`,
+          { headers }
+        );
+
+        if (deleteResponse.status === 204) {
+          bookings.value = bookings.value.filter(
+            (booking) => booking.id !== bookingId
+          );
+          successMessage.value = "Booking canceled successfully";
+          console.log("Booking canceled successfully");
+          router.push({ name: "BookingsList", query: { successMessage: successMessage.value } });
+        } else {
+          errorMessage.value = "Failed to cancel booking";
+          console.error("Failed to cancel booking:", deleteResponse.statusText);
+          router.push({ name: "BookingsList", query: { errorMessage: errorMessage.value } });
+        }
+      } catch (error) {
+        errorMessage.value = "Error during canceling booking";
+        console.error("Error during canceling booking", error);
         router.push({ name: "BookingsList", query: { errorMessage: errorMessage.value } });
       }
-    } catch (error) {
-      errorMessage.value = "Error during canceling booking";
-      console.error("Error during canceling booking", error);
-      router.push({ name: "BookingsList", query: { errorMessage: errorMessage.value } });
     }
   };
 

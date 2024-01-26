@@ -559,28 +559,31 @@
     }
 
     const deleteCar = async () => {
-      try {
+      if (confirm('Are you sure you want to delete this car?')) {
+        try {
 
-        const headers = {
-          'Content-Type': 'application/json',
-          Authorization: `JWT ${accessToken}`,
-        };
-        const response = await axios.delete(`${BASE_API_URL}/cars/${car.value.id}/`, {
-          headers: headers,
-        });
+          const headers = {
+            'Content-Type': 'application/json',
+            Authorization: `JWT ${accessToken}`,
+          };
+          const response = await axios.delete(`${BASE_API_URL}/cars/${car.value.id}/`, {
+            headers: headers,
+          });
 
-        if (response.status === 204) {
-          successMessage.value = 'Car deleted successfully';
-          router.push({ name: 'CarsList', query: { successMessage: successMessage.value } });
-        } else {
-          errorMessage.value = 'Sorry, Car is sheduled for booking by a customer!';
+          if (response.status === 204) {
+            successMessage.value = 'Car deleted successfully';
+            router.push({ name: 'CarsList', query: { successMessage: successMessage.value } });
+          } else {
+            errorMessage.value = 'Sorry, Car is sheduled for booking by a customer!';
+            router.push({ name: 'CarDetail', params: { carId: car.value.id }, query: { errorMessage: errorMessage.value } });
+          }
+          } catch (error) {
+          errorMessage.value = error.response.data[0] || 'Error deleting car';
           router.push({ name: 'CarDetail', params: { carId: car.value.id }, query: { errorMessage: errorMessage.value } });
         }
-      } catch (error) {
-        errorMessage.value = error.response.data[0] || 'Error deleting car';
-        router.push({ name: 'CarDetail', params: { carId: car.value.id }, query: { errorMessage: errorMessage.value } });
       }
-    }
+    };
+
 
     const updateCarDetails = async () => {
       try {
