@@ -18,6 +18,12 @@
 
     <div class="grid grid-cols-3 gap-6">
       <h2 class="col-span-3 text-2xl mb-4">Featured Cars</h2>
+
+      <div v-if="isLoading" class="col-span-3 text-center">
+        <font-awesome-icon class="fas fa-spinner-third fa-spin text-4xl"></font-awesome-icon>
+        <p class="text-lg mt-4">Loading...</p>
+      </div>
+
       <div v-for="car in featuredCars" :key="car.id" class="mb-6 col-span-1">
         <div class="bg-white rounded-lg overflow-hidden shadow-md p-4">
           <h3 class="text-xl font-bold mb-2">{{ car.name }}</h3>
@@ -54,6 +60,7 @@
   const router = useRouter();
 
   const featuredCars = ref([]);
+  const isLoading = ref(false);
   const bannerImage = ref(require('@/assets/img/featured4.png'));
 
   const successMessage = ref(route.query.successMessage || '');
@@ -62,6 +69,7 @@
   const BASE_API_URL = process.env.VUE_APP_BASE_API_URL;
 
   onMounted(() => {
+    isLoading.value = true;
     axios.get(`${BASE_API_URL}/cars`)
       .then(response => {
         featuredCars.value = response.data
@@ -70,6 +78,9 @@
       })
       .catch(error => {
         console.error('Error fetching featured cars data:', error);
+      })
+      .finally(() => {
+        isLoading.value = false;
       });
   });
 </script>

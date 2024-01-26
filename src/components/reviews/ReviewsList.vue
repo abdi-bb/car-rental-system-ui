@@ -162,7 +162,7 @@
     // Compute formattedReviews based on the existing reviews data
     return reviews.value.map(newReview => ({
       ...newReview,
-      readableDate: formatReadableDate(newReview.created_at),
+      readableDate: formatReadableDate(newReview.updated_at),
     }));
   });
 

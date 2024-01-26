@@ -34,7 +34,7 @@
         v-for="image in carImages"
         :key="image.id"
         :to="{ name: 'ImageDetail', params: { carId: carId, imageId: image.id } }"
-        class="group relative overflow-hidden rounded-lg border border-gray-300 transition-transform duration-300 transform hover:scale-105"
+        class="w-full md:1/3 group relative overflow-hidden rounded-lg border border-gray-300 transition-transform duration-300 transform hover:scale-105"
       >
         <img
           :src="getImageUrl(image.image)"
@@ -121,15 +121,16 @@
 
       if (response.status === 201) {
         const data = response.data;
+        fetchCarImages();
         successMessage.value = 'Image uploaded successfully';
         router.push({ name: 'ImageDetail', params: { carId: carId.value, imageId: data.id }, query: { successMessage: successMessage.value } });
       } else {
         errorMessage.value = 'Error uploading image';
-        router.push({ name: 'CarDetail', params: { carId: carId.value }, query: { errorMessage: errorMessage.value } });
+        router.push({ name: 'ImagesList', params: { carId: carId.value }, query: { errorMessage: errorMessage.value } });
       }
     } catch (error) {
-      errorMessage.value = 'Error uploading image';
-      router.push({ name: 'CarDetail', params: { carId: carId.value }, query: { errorMessage: errorMessage.value } });
+      errorMessage.value = error.response.data.image[0];
+      router.push({ name: 'ImagesList', params: { carId: carId.value }, query: { errorMessage: errorMessage.value } });
     }
   };
 

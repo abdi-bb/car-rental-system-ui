@@ -23,7 +23,7 @@
     <img
       :src="getImageUrl(image && image.image)"
       alt="Car Image"
-      class="w-full h-112 object-cover rounded-lg"
+      class="w-2/3 md:w-2/3 h-2/3 md:h-2/5 object-cover rounded-lg"
     />
 
     <!-- Admin actions -->
