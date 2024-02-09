@@ -7,6 +7,7 @@ import authPlugin from "./plugins/auth-plugin";
 import './assets/styles/tailwind.css';
 import { FontAwesomeIcon } from './plugins/font-awesome'
 
+Vue.config.productionTip = false;
 
 createApp(App)
     .use(router)
