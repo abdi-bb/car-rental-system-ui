@@ -5,7 +5,6 @@ module.exports = defineConfig({
   // custom set
   devServer: {
     public: 'django-wheelsonrent.onrender.com', // Change this to your Render.com subdomain
-    disableHostCheck: true,
   },
   
   // custom set
