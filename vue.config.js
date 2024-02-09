@@ -5,7 +5,7 @@ module.exports = defineConfig({
   // custom set
   configureWebpack: {
     devServer: {
-      allowedHosts: ['django-wheelsonrent.onrender.com'], // Change this to your Render.com subdomain
+      allowedHosts: 'all', // Change this to your Render.com subdomain
     },
     resolve: {
       fallback: {
