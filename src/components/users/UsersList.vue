@@ -48,7 +48,7 @@
 </template>
 
 <script setup>
-  import { computed, defineProps, onMounted, reactive, ref } from 'vue';
+  import { computed, onMounted, reactive, ref } from 'vue';
   import { useStore } from 'vuex';
   import { useRoute, useRouter } from 'vue-router';
   import axios from 'axios';

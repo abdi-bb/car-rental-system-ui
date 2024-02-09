@@ -108,7 +108,7 @@
                   </router-link>
                 </div>
                 <router-link
-                  :to="{ name: 'Me', params: { id: $store.state.userId } }"
+                  :to="{ name: 'Me' }"
                   class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                 >
                   <img src="../assets/img/user.png" alt="user icon" class="h-4 w-4 mr-2" />
