@@ -6,6 +6,25 @@
       >
         Manage Your Booking
       </h1>
+
+      <!-- Success and error messages -->
+      <div v-if="successMessage" class="md:w-2/3 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-md mb-4 text-sm mt-4 ml-2 mr-2">
+        <div class="flex items-center justify-between">
+          <span>{{ successMessage }}</span>
+          <button @click="clearMessages" class="text-green-700 hover:text-green-900 focus:outline-none">
+            X
+          </button>
+        </div>
+      </div>
+      <div v-if="errorMessage" class="md:w-2/3 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md mb-4 text-sm mt-4 ml-2 mr-2">
+        <div class="flex items-center justify-between">
+          <span>{{ errorMessage }}</span>
+          <button @click="clearMessages" class="text-red-700 hover:text-red-900 focus:outline-none">
+            X
+          </button>
+        </div>
+      </div>
+
       <router-link to="/cars">
         <span
           class="py-8 px-1 text-lg md:text-sm text-blue-700 transition duration-300 mb-26 mr-2 ml-2"
@@ -64,6 +83,7 @@
         <div class="bg-white p-8 rounded shadow-md">
           <h2 class="text-2xl font-semibold mb-4">Edit Booking</h2>
 
+
           <div class="mb-4">
             <label for="editStartDate" class="block text-gray-700"
               >Start Date</label
@@ -106,157 +126,183 @@
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      bookings: [],
-      showEditModal: false,
-      selectedBooking: null,
-    };
-  },
-  methods: {
-    async fetchUserBookings() {
-      try {
-        const userId = this.$store.state.userId;
-        const response = await fetch(
-          `http://localhost:8000/api/v1/bookings/?user=${userId}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `JWT ${localStorage.getItem("accessToken")}`,
-            },
-          }
+<script setup>
+  import { defineProps, computed, reactive, ref, onMounted } from "vue";
+  import { useStore } from "vuex";
+  import { useRoute, useRouter } from "vue-router";
+  import axios from "axios";
+
+  const store = useStore();
+  const route = useRoute();
+  const router = useRouter();
+
+  const bookings = ref([]);
+
+  const showEditModal = ref(false);
+  const selectedBooking = ref(null);
+
+  const successMessage = ref(route.query.successMessage || '');
+  const errorMessage = ref(route.query.errorMessage || '');
+
+  const accessToken = localStorage.getItem("accessToken");
+
+  const BASE_API_URL = process.env.VUE_APP_BASE_API_URL;
+
+  const fetchUserBookings = async () => {
+    try {
+
+      const userId = store.state.userId;
+      
+      const headers = {
+        "Content-Type": "application/json",
+        Authorization: `JWT ${accessToken}`,
+      };
+
+      const response = await axios.get(
+        `${BASE_API_URL}/bookings/?user=${userId}`,
+        { headers }
+      );
+
+      if (response.status === 200) {
+        const data = response.data;
+
+        await Promise.all(
+          data.map(async (booking) => {
+            const carResponse = await axios.get(
+              `${BASE_API_URL}/cars/${booking.car}/`
+            );
+            const carData = carResponse.data;
+            booking.car = carData;
+          })
         );
 
-        if (response.ok) {
-          const data = await response.json();
-
-          await Promise.all(
-            data.map(async (booking) => {
-              const carResponse = await fetch(
-                `http://localhost:8000/api/v1/cars/${booking.car}/`
-              );
-              const carData = await carResponse.json();
-              booking.car = carData;
-            })
-          );
-
-          this.bookings = data;
-        } else {
-          console.error("Failed to fetch user bookings");
-        }
-      } catch (error) {
-        console.error("Error during fetching user bookings", error);
+        bookings.value = data;
+      } else {
+        console.error("Failed to fetch user bookings");
       }
-    },
+    } catch (error) {
+      errorMessage.value = "Error during fetching user bookings";
+      console.error("Error during fetching user bookings", error);
+    }
+  };
 
-    async cancelBooking(bookingId) {
+  const cancelBooking = async (bookingId) => {
+    if (confirm("Are you sure you want to cancel this booking?")) {
       try {
-        const response = await fetch(
-          `http://localhost:8000/api/v1/bookings/${bookingId}/`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `JWT ${localStorage.getItem("accessToken")}`,
-            },
-          }
+        const headers = {
+          "Content-Type": "application/json",
+          Authorization: `JWT ${accessToken}`,
+        };
+
+        const response = await axios.get(
+          `${BASE_API_URL}/bookings/${bookingId}/`,
+          { headers }
         );
 
-        if (!response.ok) {
+        if (response.status !== 200) {
+          errorMessage.value = "Failed to fetch booking data";
           console.error("Failed to fetch booking data:", response.statusText);
-          return;
+          router.push({ name: "BookingsList", query: { errorMessage: errorMessage.value } });
         }
 
-        const bookingData = await response.json();
+        const bookingData = response.data;
 
-        console.log("Booking Data:", bookingData);
+        // console.log("Booking Data:", bookingData);
 
-        const carId = bookingData.car;
+        // const carId = bookingData.car;
 
-        await fetch(`http://localhost:8000/api/v1/cars/${carId}/`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `JWT ${localStorage.getItem("accessToken")}`,
-          },
-          body: JSON.stringify({
-            status: 1,
-          }),
-        });
+        // await axios.patch(
+        //   `${BASE_API_URL}/cars/${carId}/`,
+        //   { status: 1 },
+        //   { headers }
+        // );
 
-        const deleteResponse = await fetch(
-          `http://localhost:8000/api/v1/bookings/${bookingId}/`,
-          {
-            method: "DELETE",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `JWT ${localStorage.getItem("accessToken")}`,
-            },
-          }
+        const deleteResponse = await axios.delete(
+          `${BASE_API_URL}/bookings/${bookingId}/`,
+          { headers }
         );
 
-        if (deleteResponse.ok) {
-          this.bookings = this.bookings.filter(
+        if (deleteResponse.status === 204) {
+          bookings.value = bookings.value.filter(
             (booking) => booking.id !== bookingId
           );
+          successMessage.value = "Booking canceled successfully";
           console.log("Booking canceled successfully");
+          router.push({ name: "BookingsList", query: { successMessage: successMessage.value } });
         } else {
+          errorMessage.value = "Failed to cancel booking";
           console.error("Failed to cancel booking:", deleteResponse.statusText);
+          router.push({ name: "BookingsList", query: { errorMessage: errorMessage.value } });
         }
       } catch (error) {
+        errorMessage.value = "Error during canceling booking";
         console.error("Error during canceling booking", error);
+        router.push({ name: "BookingsList", query: { errorMessage: errorMessage.value } });
       }
-    },
+    }
+  };
 
-    editBooking(booking) {
-      this.selectedBooking = { ...booking };
-      this.showEditModal = true;
-    },
+  const editBooking = (booking) => {
 
-    async updateBooking() {
-      try {
-        const response = await fetch(
-          `http://localhost:8000/api/v1/bookings/${this.selectedBooking.id}/`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `JWT ${localStorage.getItem("accessToken")}`,
-            },
-            body: JSON.stringify({
-              start_date: this.selectedBooking.start_date,
-              end_date: this.selectedBooking.end_date,
-              car: this.selectedBooking.car.id,
-              user: this.selectedBooking.user,
-            }),
-          }
+    selectedBooking.value = { ...booking };
+    showEditModal.value = true;
+  };
+
+  const updateBooking = async () => {
+    try {
+
+      const headers = {
+        "Content-Type": "application/json",
+        Authorization: `JWT ${accessToken}`,
+      };
+
+      const response = await axios.put(
+        `${BASE_API_URL}/bookings/${selectedBooking.value.id}/`,
+        {
+          start_date: selectedBooking.value.start_date,
+          end_date: selectedBooking.value.end_date,
+          car: selectedBooking.value.car.id,
+          user: selectedBooking.value.user,
+        },
+        { headers }
+      );
+
+      if (response.status === 200) {
+        const index = bookings.value.findIndex(
+          (booking) => booking.id === selectedBooking.value.id
         );
+        bookings.value[index] = { ...selectedBooking.value };
 
-        if (response.ok) {
-          const index = this.bookings.findIndex(
-            (booking) => booking.id === this.selectedBooking.id
-          );
-          this.bookings[index] = { ...this.selectedBooking };
-
-          this.showEditModal = false;
-          console.log("Booking updated successfully");
-        } else {
-          console.error("Failed to update booking");
-        }
-      } catch (error) {
-        console.error("Error during updating booking", error);
+        showEditModal.value = false;
+        successMessage.value = "Booking updated successfully";
+        console.log("Booking updated successfully");
+        router.push({ name: "BookingsList", query: { successMessage: successMessage.value } });
+      } else {
+        errorMessage.value = "Failed to update booking";
+        console.error("Failed to update booking");
+        router.push({ name: "BookingsList", query: { errorMessage: errorMessage.value } });
       }
-    },
+    } catch (error) {
+      errorMessage.value = "Error during updating booking";
+      console.error("Error during updating booking", error);
+      router.push({ name: "BookingsList", query: { errorMessage: errorMessage.value } });
+    }
+  };
 
-    closeEditModal() {
-      this.showEditModal = false;
-      this.selectedBooking = null;
-    },
-  },
-  async created() {
-    console.log(this.$store.state.userId);
-    await this.fetchUserBookings();
-  },
-};
+  const closeEditModal = () => {
+    showEditModal.value = false;
+    selectedBooking.value = null;
+  };
+
+  const clearMessages = () => {
+    successMessage.value = '';
+    errorMessage.value = '';
+
+    router.replace({ query: {} });
+  };
+
+  onMounted(async () => {
+    await fetchUserBookings();
+  }); 
+
 </script>

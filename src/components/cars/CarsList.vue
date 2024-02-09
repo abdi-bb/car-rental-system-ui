@@ -1,16 +1,53 @@
 <template>
   <div class="mt-24">
     <h1 class="text-4xl font-bold mb-4">Available Cars</h1>
+    <div class="flex justify-end">
+      <!-- Button to open the modal -->
+      <button v-if="isStaff" @click="openModal" class="bg-blue-500 text-white p-2 rounded justify-end mr-24">Add New Car</button>
+    </div>
 
-    <!-- Button to open the modal -->
-    <button v-if="isStaff" @click="openModal" class="bg-blue-500 text-white p-2 rounded">Add New Car</button>
+    <!-- Success and error messages -->
+    <div v-if="successMessage" class="md:w-2/3 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-md mb-4 text-sm mt-4 ml-2 mr-2">
+      <div class="flex items-center justify-between">
+        <span>{{ successMessage }}</span>
+        <button @click="clearMessages" class="text-green-700 hover:text-green-900 focus:outline-none">
+          X
+        </button>
+      </div>
+    </div>
+    <div v-if="errorMessage" class="md:w-2/3 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md mb-4 text-sm mt-4 ml-2 mr-2">
+      <div class="flex items-center justify-between">
+        <span>{{ errorMessage }}</span>
+        <button @click="clearMessages" class="text-red-700 hover:text-red-900 focus:outline-none">
+          X
+        </button>
+      </div>
+    </div>
 
     <!-- Modal for adding a new car -->
     <div v-if="isStaff && showModal" class="fixed inset-0 z-50 overflow-auto flex items-center justify-center" @click.self="closeModal">
       <div class="modal-content bg-white w-96 mx-auto p-6 rounded-lg shadow-lg" @click.stop>
         <span class="close absolute top-2 right-2 text-gray-600 cursor-pointer" @click="closeModal">&times;</span>
 
-        <h2 class="text-2xl font-bold mb-4">Add a New Car</h2>
+        <h2 class="text-2xl font-bold mb-4 flex justify-end">Add a New Car</h2>
+
+        <!-- Success and error messages -->
+        <div v-if="successMessage" class="md:w-2/3 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-md mb-4 text-sm mt-4 ml-2 mr-2">
+          <div class="flex items-center justify-between">
+            <span>{{ successMessage }}</span>
+            <button @click="clearMessages" class="text-green-700 hover:text-green-900 focus:outline-none">
+              X
+            </button>
+          </div>
+        </div>
+        <div v-if="errorMessage" class="md:w-2/3 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md mb-4 text-sm mt-4 ml-2 mr-2">
+          <div class="flex items-center justify-between">
+            <span>{{ errorMessage }}</span>
+            <button @click="clearMessages" class="text-red-700 hover:text-red-900 focus:outline-none">
+              X
+            </button>
+          </div>
+        </div>
 
         <!-- Form for adding a new car -->
         <form @submit.prevent="addCar" class="mb-8">
@@ -58,7 +95,6 @@
           <!-- Add other input fields for the remaining attributes of the Car model -->
 
           <button
-                @click="addCar"
                 class="bg-green-500 text-white px-4 py-2 rounded mt-4"
               >
                 Add Car
@@ -75,11 +111,13 @@
 
 
     <!-- Retrieve cars list -->
+    <div v-if="isLoading" class="text-center">Loading...</div>
+    <div v-else>
     <div class="container mx-auto mt-8 flex flex-wrap pt-16">
       <router-link
         v-for="car in cars"
         :key="car.id"
-        :to="{ name: 'CarDetail', params: { id: car.id, name: car.name } }"
+        :to="{ name: 'CarDetail', params: { carId: car.id } }"
         class="w-full sm:w-1/2 md:w-1/3 lg:w-1/3 xl:w-1/3 px-4 mb-8"
       >
         <div class="bg-white rounded-lg border">
@@ -114,125 +152,98 @@
           </div>
         </div>
       </router-link>
+      </div>
   </div>
   </div>
 </template>
 
 
+<script setup>
+  import { ref, reactive, onMounted, computed } from 'vue';
+  import { useStore } from 'vuex';
+  import { useRoute, useRouter } from 'vue-router';
+  import axios from 'axios';
 
+  const store = useStore();
+  const route = useRoute();
+  const router = useRouter();
 
-<script>
-import axios from 'axios';
-import { refreshToken } from '@/services/refresh.token';
-
-export default {
-  name: 'CarsList',
-  components: {},
-  data() {
-    return {
-      cars: [],
-      newCar: {
-        name: '',
-        model: '',
-        seat: 0,
-        door: 0,
-        gearbox: '',
-        price: 0.0,
-      },
-      showModal: false,
-      isStaff: false,
-    };
-  },
-  methods: {
-    fetchCars() {
-      axios.get('http://127.0.0.1:8000/api/v1/cars/')
-        .then(response => {
-          this.cars = response.data;
-        })
-        .catch(error => {
-          console.error('Error fetching data:', error);
-        });
-    },
-    async addCar() {
-      try {
-        const accessToken = localStorage.getItem('accessToken');
-
-        const headers = {
-          'Content-Type': 'application/json',
-          Authorization: `JWT ${accessToken}`,
-        };
-
-        await axios.post('http://127.0.0.1:8000/api/v1/cars/', this.newCar, { headers });
-
-        // If the request is successful, update the cars list and reset the form
-        console.log('Car added successfully');
-        this.fetchCars();
-        this.newCar = {
-          name: '',
-          model: '',
-          seat: 0,
-          door: 0,
-          gearbox: '',
-          price: 0.0,
-        };
-      } catch (error) {
-        if (error.response && error.response.status === 401) {
-          // Unauthorized, try refreshing the token
-          try {
-            const newAccessToken = await refreshToken(this.$store);
-            // Retry the original request with the new access token
-            await this.addCarWithToken(newAccessToken);
-          } catch (refreshError) {
-            // Token refresh failed, handle accordingly
-            console.error('Token refresh failed:', refreshError);
-          }
-        } else {
-          // Handle other errors
-          console.error('Error adding car:', error);
-        }
-      }
-    },
-
-    async addCarWithToken(newAccessToken) {
-      try {
-        const headers = {
-          'Content-Type': 'application/json',
-          Authorization: `JWT ${newAccessToken}`,
-        };
-
-        await axios.post('http://127.0.0.1:8000/api/v1/cars/', this.newCar, { headers });
-
-        // If the request is successful, update the cars list and reset the form
-        console.log('Car added successfully');
-        this.fetchCars();
-        this.newCar = {
-          name: '',
-          model: '',
-          seat: 0,
-          door: 0,
-          gearbox: '',
-          price: 0.0,
-        };
-      } catch (error) {
-        // Handle errors in the retry request if needed
-        console.error('Error adding car with new token:', error);
-      }
-    },
-    openModal() {
-      this.showModal = true;
-    },
-    closeModal() {
-      this.showModal = false;
-    },
-  },
-  created() {
-    this.fetchCars();
-    this.$store.dispatch('initializeApp').then(() => {
-      this.isStaff = this.$store.state.isStaff;
+  const cars = ref([]);
+  const newCar = reactive({
+    name: '',
+    model: '',
+    seat: 0,
+    door: 0,
+    gearbox: '',
+    price: 0.0,
   });
-  },
-};
+
+  const showModal = ref(false);
+  const isLoading = ref(true);
+
+  const successMessage = ref(route.query.successMessage);
+  const errorMessage = ref(route.query.errorMessage);
+
+  const BASE_API_URL = process.env.VUE_APP_BASE_API_URL;
+
+  const isStaff = computed(() => store.state.isStaff);
+
+
+  const fetchCars = async () => {
+    try {
+
+      const response = await axios.get(`${BASE_API_URL}/cars/`);
+      cars.value = response.data;
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      errorMessage.value = 'Error fetching data';
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  const addCar = async () => {
+    try {
+
+      const accessToken = localStorage.getItem('accessToken');
+      const headers = {
+        'Content-Type': 'application/json',
+        Authorization: `JWT ${accessToken}`,
+      };
+
+      const response = await axios.post(`${BASE_API_URL}/cars/`, newCar, { headers });
+      fetchCars();
+      successMessage.value = 'Car added successfully';
+      closeModal();
+      router.push({ name: 'CarDetail', params: { carId: response.data.id }, query: { successMessage: successMessage.value } });
+    } catch (error) {
+      if (error.response && error.response.status === 401) {
+        errorMessage.value = 'Unauthorized or expired token';
+        router.push({ name: 'Login', query: { errorMessage: errorMessage.value } });
+      } else {
+        errorMessage.value = 'Error adding new car';
+        router.push({ query: { errorMessage: errorMessage.value } });
+      }
+    }
+  };
+
+  const openModal = () => {
+    showModal.value = true;
+  };
+
+  const closeModal = () => {
+    showModal.value = false;
+  };
+
+  const clearMessages = () => {
+    successMessage.value = '';
+    errorMessage.value = '';
+
+    router.replace({ query: {} });
+  };
+
+  onMounted(async () => {
+    fetchCars();
+  });
+
 </script>
-
-
-<style></style>

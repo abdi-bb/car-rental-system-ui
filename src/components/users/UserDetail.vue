@@ -6,6 +6,25 @@
       >
         Manage Your Account
       </h1>
+
+      <!-- Success and error messages -->
+      <div v-if="successMessage" class="md:w-2/3 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-md mb-4 text-sm mt-4 ml-2 mr-2">
+        <div class="flex items-center justify-between">
+          <span>{{ successMessage }}</span>
+          <button @click="clearMessages" class="text-green-700 hover:text-green-900 focus:outline-none">
+            X
+          </button>
+        </div>
+      </div>
+      <div v-if="errorMessage" class="md:w-2/3 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md mb-4 text-sm mt-4 ml-2 mr-2">
+        <div class="flex items-center justify-between">
+          <span>{{ errorMessage }}</span>
+          <button @click="clearMessages" class="text-red-700 hover:text-red-900 focus:outline-none">
+            X
+          </button>
+        </div>
+      </div>
+
       <router-link to="/cars">
         <span
           class="py-8 px-1 text-lg md:text-sm text-blue-700 transition duration-300 mb-26 mr-2 ml-2"
@@ -48,68 +67,84 @@
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      targetUser: {},
+<script setup>
+  import { onMounted, ref } from 'vue';
+  import { useStore } from 'vuex';
+  import { useRoute, useRouter } from 'vue-router';
+  import axios from 'axios';
+
+  const store = useStore();
+  const route = useRoute();
+  const router = useRouter();
+
+  const targetUser = ref({});
+  const userId = ref(route.params.userId);
+
+  const successMessage = ref(route.query.successMessage);
+  const errorMessage = ref(route.query.errorMessage);
+
+  const accessToken = localStorage.getItem('accessToken');
+
+  const BASE_API_URL = process.env.VUE_APP_BASE_API_URL;
+
+  const fetchUserAccount = async () => {
+    try {
+
+      const headers = {
+        'Authorization': `JWT ${accessToken}`,
+      };
+      const response = await axios.get(`${BASE_API_URL}/auth/users/${userId.value}`, { headers });
+
+      if (response.status === 200) {
+        targetUser.value = response.data;
+      } else {
+        errorMessage.value = "Failed to fetch targetUser account information";
+        router.push({ name: "UserDetail", params: { userId: userId.value }, query: { errorMessage: errorMessage.value } });
+    }
+    } catch (error) {
+      errorMessage.value = "Error during fetching targetUser account information";
+      router.push({ name: "UserDetail", params: { userId: userId.value }, query: { errorMessage: errorMessage.value } });
+    }
+  };
+
+  const deleteUser = async () => {
+    try {
+
+      const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `JWT ${accessToken}`,
     };
-  },
-  methods: {
-    async fetchUserAccount() {
-      try {
-        const accessToken = localStorage.getItem('accessToken');
 
-        const headers = {
-          'Authorization': `JWT ${accessToken}`,
-        };
-        const response = await fetch(`http://127.0.0.1:8000/api/v1/auth/users/${this.$route.params.id}`, { headers });
+    // Prompt the user for their current password
+    const current_password = prompt("Please enter your password to confirm account deletion");
+    const requestBody = {
+      current_password: current_password,
+    };
 
-        if (response.ok) {
-          const data = await response.json();
-          this.targetUser = data;
-        } else {
-          console.error("Failed to fetch targetUser account information");
-        }
-      } catch (error) {
-        console.error("Error during fetching targetUser account information", error);
-      }
-    },
+    const response = await axios.delete(`${BASE_API_URL}/auth/users/${userId.value}`, { headers, data: requestBody });
 
+    if (response.status === 204) {
+      successMessage.value = "Account deleted successfully";
+      router.push({ name: "UsersList", query: { successMessage: successMessage.value } });
+    } else {
+      errorMessage.value = "Failed to delete account";
+      router.push({ name: "UserDetail", params: { userId: userId.value }, query: { errorMessage: errorMessage.value } });
+    }
+    } catch (error) {
+      errorMessage.value = "Error during deleting account try checking your password";
+      router.push({ name: "UserDetail", params: { userId: userId.value }, query: { errorMessage: errorMessage.value } });
+    }
+  };
 
-    async deleteUser() {
-      try {
-    
-        const accessToken = localStorage.getItem('accessToken');
-        const headers = {
-          'Content-Type': 'application/json',
-          Authorization: `JWT ${accessToken}`,
-        };
-         // Prompt the user for their current password
-        const current_password = prompt("Please enter your password to confirm account deletion");
-        const requestBody = {
-          current_password: current_password,
-        };
+  const clearMessages = () => {
+    successMessage.value = "";
+    errorMessage.value = "";
 
-        const response = await fetch(`http://localhost:8000/api/v1/auth/users/${this.targetUser.id}`, {
-          method: "DELETE",
-          headers: headers,
-          body: JSON.stringify(requestBody),
-        });
+    router.replace({ query: {} });
+  };
 
-        if (response.ok) {
-          console.log("Account deleted successfully");
-          this.$router.push({ name: "UsersList" });
-        } else {
-          console.error("Failed to delete account");
-        }
-      } catch (error) {
-        console.error("Error during deleting account", error);
-      }
-    },
-  },
-  async created() {
-    await this.fetchUserAccount();
-  },
-};
+  onMounted(async () => {
+    await fetchUserAccount();
+  });
+
 </script>

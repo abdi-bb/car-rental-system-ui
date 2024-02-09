@@ -1,10 +1,29 @@
 <template>
   <div class="mt-24">
     <h2 class="text-2xl font-semibold mb-4">Car Image Detail</h2>
+
+    <!-- Success and error messages -->
+    <div v-if="successMessage" class="md:w-2/3 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-md mb-4 text-sm mt-4 ml-2 mr-2">
+      <div class="flex items-center justify-between">
+        <span>{{ successMessage }}</span>
+        <button @click="clearMessages" class="text-green-700 hover:text-green-900 focus:outline-none">
+          X
+        </button>
+      </div>
+    </div>
+    <div v-if="errorMessage" class="md:w-2/3 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md mb-4 text-sm mt-4 ml-2 mr-2">
+      <div class="flex items-center justify-between">
+        <span>{{ errorMessage }}</span>
+        <button @click="clearMessages" class="text-red-700 hover:text-red-900 focus:outline-none">
+          X
+        </button>
+      </div>
+    </div>
+
     <img
       :src="getImageUrl(image && image.image)"
       alt="Car Image"
-      class="w-full h-112 object-cover rounded-lg"
+      class="w-2/3 md:w-2/3 h-2/3 md:h-2/5 object-cover rounded-lg"
     />
 
     <!-- Admin actions -->
@@ -17,6 +36,25 @@
     <div v-if="isUpdateModalOpen" class="modal">
       <div class="modal-content">
         <h2>Update Image</h2>
+
+        <!-- Success and error messages -->
+        <div v-if="successMessage" class="md:w-2/3 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-md mb-4 text-sm mt-4 ml-2 mr-2">
+          <div class="flex items-center justify-between">
+            <span>{{ successMessage }}</span>
+            <button @click="clearMessages" class="text-green-700 hover:text-green-900 focus:outline-none">
+              X
+            </button>
+          </div>
+        </div>
+        <div v-if="errorMessage" class="md:w-2/3 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md mb-4 text-sm mt-4 ml-2 mr-2">
+          <div class="flex items-center justify-between">
+            <span>{{ errorMessage }}</span>
+            <button @click="clearMessages" class="text-red-700 hover:text-red-900 focus:outline-none">
+              X
+            </button>
+          </div>
+        </div>
+
         <input type="file" @change="handleFileChange" />
         <button @click="submitUpdate" class="mr-2">Update</button>
         <button @click="closeUpdateModal" class="ml-2">Cancel</button>
@@ -25,144 +63,185 @@
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      image: {},
-      isUpdateModalOpen: false,
-      updatedImageFile: null,
-    };
-  },
-  computed: {
-    isAdmin() {
-      return this.$store.state.isStaff;
-    },
-  },
-  watch: {
-    '$route.params': {
-      handler: 'fetchCarImage',
-      immediate: true,
-    },
-  },
-  methods: {
-    async fetchCarImage() {
-      try {
-        const { carId, imageId } = this.$route.params;
-        const response = await fetch(`http://127.0.0.1:8000/api/v1/cars/${carId}/images/${imageId}/`);
-        this.image = await response.json();
-      } catch (error) {
-        console.error('Error fetching car image:', error);
+<script setup>
+  import { computed, reactive, ref, onMounted, watch } from 'vue';
+  import { useStore } from 'vuex';
+  import { useRoute, useRouter } from 'vue-router';
+  import axios from 'axios';
+
+  const store = useStore();
+  const route = useRoute();
+  const router = useRouter();
+
+  const image = ref({});
+  const carId = ref(route.params.carId);
+  const imageId = ref(route.params.imageId);
+
+  const isUpdateModalOpen = ref(false);
+  const updatedImageFile = ref(null);
+
+  const isAdmin = computed(() => store.state.isStaff);
+
+  const successMessage = ref(route.query.successMessage || '');
+  const errorMessage = ref(route.query.errorMessage || '');
+
+  const accessToken = computed(() => store.state.accessToken);
+
+  const BASE_API_URL = process.env.VUE_APP_BASE_API_URL;
+
+  const fetchCarImage = async () => {
+    try {
+
+      const response = await axios.get(
+        `${BASE_API_URL}/cars/${carId.value}/images/${imageId.value}/`
+      );
+
+      if (response.status === 200) {
+        const data = response.data;
+        image.value = data;
+      } else {
+        errorMessage.value = 'Error fetching car image data';
+        router.push({ name: 'ImagesList', params: { carId: carId.value } });
       }
-    },
-    getImageUrl(relativeUrl) {
-      return relativeUrl && relativeUrl.startsWith('http') ? relativeUrl : `http://localhost:8000/${relativeUrl}`;
-    },
-    async deleteImage() {
-      try {
-        const { carId, imageId } = this.$route.params;
-        const accessToken = localStorage.getItem('accessToken');
-        const headers = {
-          Authorization: `JWT ${accessToken}`,
-        };
+    } catch (error) {
+      errorMessage.value = 'Error fetching car image data';
+      image.value = {};
+      router.push({ name: 'ImagesList', params: { carId: carId.value } });
+    }
+  };
 
-        const response = await fetch(`http://127.0.0.1:8000/api/v1/cars/${carId}/images/${imageId}/`, {
-          method: 'DELETE',
-          headers: headers,
-        });
+  watch(() => route.params, fetchCarImage, { immediate: true });
 
-        if (response.ok) {
-          console.log('Image deleted successfully');
-          this.fetchCarImage();
-          // Redirect to the car detail page after deletion
-          this.$router.push({ name: 'CarDetail', params: { carId: carId } });
-        } else {
-          console.error('Image deletion failed');
-        }
-      } catch (error) {
-        console.error('Error deleting image:', error);
+  const getImageUrl = (relativeUrl) => {
+    if (relativeUrl) {
+      const sanitizedRelativeUrl = relativeUrl.replace(/^\//, '');
+
+      if (sanitizedRelativeUrl.startsWith('http') || sanitizedRelativeUrl.startsWith('https')) {
+        return sanitizedRelativeUrl;
+      } else {
+        const fullUrl = `http://localhost:8000/${sanitizedRelativeUrl}`;
+        return fullUrl;
       }
-    },
-    async updateImage() {
-      try {
-        const { carId, imageId } = this.$route.params;
-        const accessToken = localStorage.getItem('accessToken');
-        const headers = {
-          Authorization: `JWT ${accessToken}`,
-        };
+    } else {
+      return 'https://via.placeholder.com/300x200';
+    }
+  };
 
-        // Assuming you have an input field for selecting a new image file
-        const formData = new FormData();
-        formData.append('image', this.updatedImageFile);
+  const deleteImage = async () => {
+    try {
 
-        const response = await fetch(`http://127.0.0.1:8000/api/v1/cars/${carId}/images/${imageId}/`, {
-          method: 'PUT',
-          headers: headers,
-          body: formData,
-        });
+      const headers = {
+        'Content-Type': 'application/json',
+        Authorization: `JWT ${accessToken.value}`,
+      };
 
-        if (response.ok) {
-          console.log('Image updated successfully');
-          // Fetch the updated data before navigating to the new route
-          this.fetchCarImage();
-          // Redirect to the image detail page after updating
-          this.$router.push({ name: 'ImageDetail', params: { carId: carId, imageId: imageId } });
-        } else {
-          console.error('Image update failed');
-        }
-      } catch (error) {
-        console.error('Error updating image:', error);
+      const response = await axios.delete(
+        `${BASE_API_URL}/cars/${carId.value}/images/${imageId.value}/`,
+        { headers }
+      );
+
+      if (response.status === 204) {
+        successMessage.value = 'Image deleted successfully';
+        router.push({ name: 'ImagesList', params: { carId: carId.value }, query: { successMessage: successMessage.value } });
+      } else {
+        errorMessage.value = 'Error deleting image';
+        router.push({ name: 'ImageDetail', params: { carId: carId.value, imageId: imageId.value }, query: { errorMessage: errorMessage.value } });
       }
-    },
-    openUpdateModal() {
-      this.isUpdateModalOpen = true;
-    },
-    closeUpdateModal() {
-      this.isUpdateModalOpen = false;
-      this.updatedImageFile = null;
-    },
-    handleFileChange(event) {
-      this.updatedImageFile = event.target.files[0];
-    },
-    async submitUpdate() {
-      try {
-        const { carId, imageId } = this.$route.params;
-        const accessToken = localStorage.getItem('accessToken');
-        const headers = {
-          Authorization: `JWT ${accessToken}`,
-        };
+    } catch (error) {
+      errorMessage.value = 'Error deleting image';
+      router.push({ name: 'ImageDetail', params: { carId: carId.value, imageId: imageId.value }, query: { errorMessage: errorMessage.value } });
+    }
+  };
 
-        // Assuming you have an input field for selecting a new image file
-        const formData = new FormData();
-        formData.append('image', this.updatedImageFile);
+  const updateImage = async () => {
+    try {
 
-        const response = await fetch(`http://localhost:8000/api/v1/cars/${carId}/images/${imageId}/`, {
-          method: 'PUT',
-          headers: headers,
-          body: formData,
-        });
-        if (response.ok) {
-          console.log('Image updated successfully');
-          // Fetch the updated data before navigating to the new route
-          this.fetchCarImage();
-          // Redirect to the image detail page after updating
-          this.$router.push({ name: 'ImageDetail', params: { carId: carId, imageId: imageId } });
-          this.closeUpdateModal();
-        } else {
-          console.error('Image update failed');
-        }
-      } catch (error) {
-        console.error('Error updating image:', error);
+      const headers = {
+        'Content-Type': 'multipart/form-data',
+        Authorization: `JWT ${accessToken.value}`,
+      };
+
+      const formData = new FormData();
+      formData.append('image', updatedImageFile.value);
+
+      const response = await axios.put(
+        `${BASE_API_URL}/cars/${carId.value}/images/${imageId.value}/`,
+        formData,
+        { headers }
+      );
+
+      if (response.status === 200) {
+        successMessage.value = 'Image updated successfully';
+        router.push({ name: 'ImageDetail', params: { carId: carId.value, imageId: imageId.value }, query: { successMessage: successMessage.value } });
+      } else {
+        errorMessage.value = 'Error updating image';
+        router.push({ name: 'ImageDetail', params: { carId: carId.value, imageId: imageId.value }, query: { errorMessage: errorMessage.value } });
       }
-    },
-  },
-  beforeRouteUpdate(to, from, next) {
-    // This hook is called when the route parameters change
-    // Use it to refresh the data when the user navigates back from the delete action
-    this.fetchCarImage();
+    } catch (error) {
+      errorMessage.value = 'Error updating image';
+      router.push({ name: 'ImageDetail', params: { carId: carId.value, imageId: imageId.value }, query: { errorMessage: errorMessage.value } });
+    }
+  };
+
+  const openUpdateModal = () => {
+    isUpdateModalOpen.value = true;
+  };
+
+  const closeUpdateModal = () => {
+    isUpdateModalOpen.value = false;
+    updatedImageFile.value = null;
+  };
+
+  const handleFileChange = (event) => {
+    updatedImageFile.value = event.target.files[0];
+  };
+
+  const submitUpdate = async () => {
+    try {
+
+      const headers = {
+        'Content-Type': 'multipart/form-data',
+        Authorization: `JWT ${accessToken.value}`,
+      };
+
+      const formData = new FormData();
+      formData.append('image', updatedImageFile.value);
+
+      const response = await axios.put(
+        `${BASE_API_URL}/cars/${carId.value}/images/${imageId.value}/`,
+        formData,
+        { headers }
+      );
+
+      if (response.status === 200) {
+        closeUpdateModal();
+        successMessage.value = 'Image updated successfully';
+        router.push({ name: 'ImageDetail', params: { carId: carId.value, imageId: imageId.value }, query: { successMessage: successMessage.value } });
+      } else {
+        errorMessage.value = 'Error updating image';
+        router.push({ name: 'ImageDetail', params: { carId: carId.value, imageId: imageId.value }, query: { errorMessage: errorMessage.value } });
+      }
+    } catch (error) {
+      errorMessage.value = 'Error updating image';
+      router.push({ name: 'ImageDetail', params: { carId: carId.value, imageId: imageId.value }, query: { errorMessage: errorMessage.value } });
+    }
+  };
+
+  const clearMessages = () => {
+    successMessage.value = '';
+    errorMessage.value = '';
+
+    router.replace({ query: {} });
+  };
+
+  const beforeRouteUpdate = (to, from, next) => {
+    fetchCarImage();
     next();
-  },
-};
+  };
+
+  onMounted(() => {
+    fetchCarImage();
+  });
 </script>
 
 <style>
