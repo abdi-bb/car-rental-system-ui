@@ -1,6 +1,12 @@
 const { defineConfig } = require('@vue/cli-service')
 module.exports = defineConfig({
   transpileDependencies: true,
+
+  // custom set
+  devServer: {
+    public: 'django-wheelsonrent.onrender.com', // Change this to your Render.com subdomain
+    disableHostCheck: true,
+  },
   
   // custom set
   configureWebpack: {
