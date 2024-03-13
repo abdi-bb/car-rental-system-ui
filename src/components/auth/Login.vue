@@ -1,6 +1,6 @@
 <template>
   <!-- Login Form -->
-  <div class="bg-gray-100 p-8 rounded-md shadow-md w-1/3 md:w-2/3 mt-24 h-full md:h-2/3 mx-auto max-w-md">
+  <div class="bg-gray-100 p-8 rounded-md shadow-md w-1/3 md:w-2/3 mt-24 h-full md:h-2/3 mx-auto max-w-md" v-if="!isAuthenticated">
     <form>
       <h2
         class="text-2xl font-semibold mb-4 col-span-full flex items-center justify-between"
